@@ -1,0 +1,51 @@
+stages:
+  - test
+  - analysis
+  - security
+
+# CI: Unit Tests
+run_tests:
+  stage: test
+  image: eclipse-temurin:21
+  script:
+    - chmod +x ./gradlew
+    - ./gradlew test
+  only:
+    - branches
+    - merge_requests
+
+# PMD Code Analysis
+pmd_scan:
+  stage: analysis
+  image: eclipse-temurin:21
+  before_script:
+    - apt-get update && apt-get install -y wget unzip
+    - wget https://github.com/pmd/pmd/releases/download/pmd_releases%2F6.55.0/pmd-bin-6.55.0.zip
+    - unzip pmd-bin-6.55.0.zip
+  script:
+    - ./pmd-bin-6.55.0/bin/run.sh pmd -d src/main/java -R rulesets/java/quickstart.xml -f sarif -r pmd-report.sarif
+  artifacts:
+    paths:
+      - pmd-report.sarif
+    expire_in: 1 week
+  only:
+    - branches
+    - merge_requests
+    - schedules
+
+# Scorecard Security Scan (Static artifact generation only — no GitHub dashboard upload)
+scorecard_analysis:
+  stage: security
+  image: golang:1.21
+  before_script:
+    - go install github.com/ossf/scorecard/v4@latest
+    - export PATH=$PATH:$(go env GOPATH)/bin
+  script:
+    - scorecard --repo=. --format sarif --output-file results.sarif
+  artifacts:
+    paths:
+      - results.sarif
+    expire_in: 1 week
+  only:
+    - master
+    - schedules
