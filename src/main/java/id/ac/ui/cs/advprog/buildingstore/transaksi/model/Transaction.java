@@ -13,7 +13,8 @@ import java.util.UUID;
 public class Transaction {
 
     private String id;
-    private List<TransactionItem> items = new ArrayList<>();
+    // Ini nunggu model dari Inventory Management biar pake dari sana aja
+    //private List<TransactionItem> items = new ArrayList<>();
     @Setter
     private TransactionState state;
 
