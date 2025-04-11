@@ -14,6 +14,7 @@ public class Transaction {
 
     private String id;
     private List<TransactionItem> items = new ArrayList<>();
+    @Setter
     private TransactionState state;
 
     public Transaction() {
@@ -21,7 +22,7 @@ public class Transaction {
         this.state = new InProgressState();
     }
 
-    // State pattern delegations
+    // Using State Pattern because the transactions will have different statuses that behaves differently
 
     public void moveToPayment() {
         state.moveToPayment(this);
@@ -37,10 +38,6 @@ public class Transaction {
 
     public TransactionStatus getStatus() {
         return state.getStatus();
-    }
-
-    public void setState(TransactionState state) {
-        this.state = state;
     }
 
     public boolean isEditable() {
