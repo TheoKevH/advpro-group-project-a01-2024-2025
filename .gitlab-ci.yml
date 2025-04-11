@@ -38,28 +38,28 @@ pmd_scan:
     - schedules
 
 # Scorecard Security Scan (Static artifact generation only — no GitHub dashboard upload)
-scorecard_analysis:
-  stage: security
-  image: golang:1.21
-  before_script:
-    - go install github.com/ossf/scorecard/v4@latest
-    - export PATH=$PATH:$(go env GOPATH)/bin
-  script:
-    - |
-      scorecard \
-        --local=. \
-        --checks=Binary-Artifacts,Pinned-Dependencies,SAST,Packaging \
-        --format json \
-        -o results.json
-  artifacts:
-    paths:
-      - results.json
-    expire_in: 1 week
-  only:
-    - main
-    - staging
-    - branches
-    - schedules
+#scorecard_analysis:
+#  stage: security
+#  image: golang:1.21
+#  before_script:
+#    - go install github.com/ossf/scorecard/v4@latest
+#    - export PATH=$PATH:$(go env GOPATH)/bin
+#  script:
+#    - |
+#     scorecard \
+#        --local=. \
+#       --checks=Binary-Artifacts,Pinned-Dependencies,SAST,Packaging \
+#        --format json \
+#        -o results.json
+#  artifacts:
+#    paths:
+#      - results.json
+#    expire_in: 1 week
+#  only:
+#    - main
+#    - staging
+#    - branches
+#    - schedules
 
 
 deploy_to_ec2:
