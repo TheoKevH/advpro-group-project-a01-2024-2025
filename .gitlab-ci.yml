@@ -68,6 +68,7 @@ deploy_to_ec2:
   only:
     - main
   before_script:
+    - apt-get update && apt-get install -y openssh-client
     - chmod +x ./gradlew
     - ./gradlew clean bootJar
     - mkdir -p ~/.ssh
