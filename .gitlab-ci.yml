@@ -37,7 +37,7 @@ pmd_scan:
     - merge_requests
     - schedules
 
-# Scorecard Security Scan (Static artifact generation only — no GitHub dashboard upload) (hmm ini belum fix)
+# Scorecard Security Scan (Static artifact generation only — no GitHub dashboard upload)
 scorecard_analysis:
   stage: security
   image: golang:1.21
@@ -45,10 +45,10 @@ scorecard_analysis:
     - go install github.com/ossf/scorecard/v4@latest
     - export PATH=$PATH:$(go env GOPATH)/bin
   script:
-    - scorecard --repo=. --format sarif --output-file results.sarif
+    - scorecard --local=. --format json -o results.json
   artifacts:
     paths:
-      - results.sarif
+      - results.json
     expire_in: 1 week
   only:
     - main
