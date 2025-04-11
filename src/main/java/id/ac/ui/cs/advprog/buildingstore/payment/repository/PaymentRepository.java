@@ -1,6 +1,6 @@
-package id.ac.ui.cs.advprog.buildingstore.repository;
+package id.ac.ui.cs.advprog.buildingstore.payment.repository;
 
-import id.ac.ui.cs.advprog.buildingstore.model.Payment;
+import id.ac.ui.cs.advprog.buildingstore.payment.model.Payment;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;

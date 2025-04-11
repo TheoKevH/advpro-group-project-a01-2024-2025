@@ -1,6 +1,6 @@
-package id.ac.ui.cs.advprog.buildingstore.service;
+package id.ac.ui.cs.advprog.buildingstore.payment.service;
 
-import id.ac.ui.cs.advprog.buildingstore.model.Payment;
+import id.ac.ui.cs.advprog.buildingstore.payment.model.Payment;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

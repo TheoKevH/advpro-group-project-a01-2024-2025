@@ -1,4 +1,4 @@
-package id.ac.ui.cs.advprog.buildingstore.model;
+package id.ac.ui.cs.advprog.buildingstore.payment.model;
 
 import lombok.Getter;
 import lombok.Setter;

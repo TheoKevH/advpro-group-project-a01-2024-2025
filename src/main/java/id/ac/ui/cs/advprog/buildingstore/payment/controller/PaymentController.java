@@ -1,9 +1,8 @@
-package id.ac.ui.cs.advprog.buildingstore.controller;
+package id.ac.ui.cs.advprog.buildingstore.payment.controller;
 
-import id.ac.ui.cs.advprog.buildingstore.model.Payment;
-import id.ac.ui.cs.advprog.buildingstore.service.PaymentService;
+import id.ac.ui.cs.advprog.buildingstore.payment.model.Payment;
+import id.ac.ui.cs.advprog.buildingstore.payment.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
