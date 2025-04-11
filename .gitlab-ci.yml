@@ -45,7 +45,9 @@ scorecard_analysis:
     - go install github.com/ossf/scorecard/v4@latest
     - export PATH=$PATH:$(go env GOPATH)/bin
   script:
-    - scorecard --local=. --skip=Dependency-Update-Tool,Vulnerabilities,Maintained,Contributors --format json -o results.json
+    - scorecard --local=. \
+      --checks=Binary-Artifacts,Pinned-Dependencies,CI-Tests,SAST,Packaging \
+      --format json -o results.json
   artifacts:
     paths:
       - results.json
@@ -53,7 +55,9 @@ scorecard_analysis:
   only:
     - main
     - staging
+    - branches
     - schedules
+
 
 deploy_to_ec2:
   stage: deploy
