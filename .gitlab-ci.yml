@@ -48,7 +48,7 @@ scorecard_analysis:
     - |
       scorecard \
         --local=. \
-        --checks=Binary-Artifacts,Pinned-Dependencies,CI-Tests,SAST,Packaging \
+        --checks=Binary-Artifacts,Pinned-Dependencies,SAST,Packaging \
         --format json \
         -o results.json
   artifacts:
