@@ -1,0 +1,83 @@
+stages:
+  - test
+  - analysis
+  - security
+  - deploy
+
+# CI: Unit Tests
+run_tests:
+  stage: test
+  image: eclipse-temurin:21
+  script:
+    - chmod +x ./gradlew
+    - ./gradlew test
+  only:
+    - branches
+    - merge_requests
+
+# PMD Code Analysis (ini mau diganti ke sonarcloud aja?)
+pmd_scan:
+  stage: analysis
+  image: eclipse-temurin:21
+  before_script:
+    - apt-get update && apt-get install -y wget unzip
+    - wget https://github.com/pmd/pmd/releases/download/pmd_releases%2F6.55.0/pmd-bin-6.55.0.zip
+    - unzip pmd-bin-6.55.0.zip
+  script:
+    - ./pmd-bin-6.55.0/bin/run.sh pmd -d src/main/java -R rulesets/java/quickstart.xml -f sarif -r pmd-report.sarif
+  allow_failure: true
+  artifacts:
+    paths:
+      - pmd-report.sarif
+    expire_in: 1 week
+  only:
+    - main
+    - staging
+    - branches
+    - merge_requests
+    - schedules
+
+# Scorecard Security Scan (Static artifact generation only — no GitHub dashboard upload)
+#scorecard_analysis:
+#  stage: security
+#  image: golang:1.21
+#  before_script:
+#    - go install github.com/ossf/scorecard/v4@latest
+#    - export PATH=$PATH:$(go env GOPATH)/bin
+#  script:
+#    - |
+#     scorecard \
+#        --local=. \
+#       --checks=Binary-Artifacts,Pinned-Dependencies,SAST,Packaging \
+#        --format json \
+#        -o results.json
+#  artifacts:
+#    paths:
+#      - results.json
+#    expire_in: 1 week
+#  only:
+#    - main
+#    - staging
+#    - branches
+#    - schedules
+
+
+deploy_to_ec2:
+  stage: deploy
+  image: eclipse-temurin:21
+  only:
+    - main
+  before_script:
+    - chmod +x ./gradlew
+    - ./gradlew clean bootJar
+    - mkdir -p ~/.ssh
+    - echo "$EC2_DEPLOY_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+  script:
+    - echo "Deploying to EC2 at $EC2_HOST"
+    - scp build/libs/$JAR_NAME $EC2_USER@$EC2_HOST:/home/ec2-user/
+    - ssh $EC2_USER@$EC2_HOST "
+        pkill -f $JAR_NAME || true &&
+        nohup java -jar $JAR_NAME > /home/ec2-user/app.log 2>&1 &
+      "
