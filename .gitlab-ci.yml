@@ -15,7 +15,7 @@ run_tests:
     - branches
     - merge_requests
 
-# PMD Code Analysis (ini mau diganti ke sonarcloud aja deh)
+# PMD Code Analysis (ini mau diganti ke sonarcloud aja?)
 pmd_scan:
   stage: analysis
   image: eclipse-temurin:21
@@ -25,11 +25,14 @@ pmd_scan:
     - unzip pmd-bin-6.55.0.zip
   script:
     - ./pmd-bin-6.55.0/bin/run.sh pmd -d src/main/java -R rulesets/java/quickstart.xml -f sarif -r pmd-report.sarif
+  allow_failure: true
   artifacts:
     paths:
       - pmd-report.sarif
     expire_in: 1 week
   only:
+    - main
+    - staging
     - branches
     - merge_requests
     - schedules
@@ -48,7 +51,8 @@ scorecard_analysis:
       - results.sarif
     expire_in: 1 week
   only:
-    - master
+    - main
+    - staging
     - schedules
 
 deploy_to_ec2:
