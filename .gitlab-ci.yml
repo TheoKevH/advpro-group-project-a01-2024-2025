@@ -45,9 +45,12 @@ scorecard_analysis:
     - go install github.com/ossf/scorecard/v4@latest
     - export PATH=$PATH:$(go env GOPATH)/bin
   script:
-    - scorecard --local=. \
-      --checks=Binary-Artifacts,Pinned-Dependencies,CI-Tests,SAST,Packaging \
-      --format json -o results.json
+    - |
+      scorecard \
+        --local=. \
+        --checks=Binary-Artifacts,Pinned-Dependencies,CI-Tests,SAST,Packaging \
+        --format json \
+        -o results.json
   artifacts:
     paths:
       - results.json
