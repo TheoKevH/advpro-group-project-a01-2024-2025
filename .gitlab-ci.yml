@@ -67,6 +67,7 @@ deploy_to_ec2:
   image: eclipse-temurin:21
   only:
     - main
+    - kevin #for testing
   before_script:
     - apt-get update && apt-get install -y openssh-client
     - chmod +x ./gradlew
