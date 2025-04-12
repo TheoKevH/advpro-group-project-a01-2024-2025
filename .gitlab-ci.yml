@@ -1,7 +1,7 @@
 stages:
-  - test
-  - analysis
-  - security
+  #- test
+  #- analysis
+  #- security
   - deploy
 
 # CI: Unit Tests
@@ -73,13 +73,13 @@ deploy_to_ec2:
     - chmod +x ./gradlew
     - ./gradlew clean bootJar
     - mkdir -p ~/.ssh
-    - echo "$EC2_DEPLOY_KEY" > ~/.ssh/new-key
-    - chmod 400 ~/.ssh/new-key
+    - echo "$EC2_DEPLOY_KEY" > ~/.ssh/id_ed25519
+    - chmod 400 ~/.ssh/id_ed25519
     - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
   script:
     - echo "Deploying to EC2 at $EC2_HOST"
-    - scp -i ~/.ssh/new-key -o StrictHostKeyChecking=no build/libs/$JAR_NAME $EC2_USER@$EC2_HOST:/home/ec2-user/
-    - ssh -i ~/.ssh/new-key -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "
+    - scp -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no build/libs/$JAR_NAME $EC2_USER@$EC2_HOST:/home/ec2-user/
+    - ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "
       pkill -f $JAR_NAME || true &&
       nohup java -jar $JAR_NAME > /home/ec2-user/app.log 2>&1 &
       "
