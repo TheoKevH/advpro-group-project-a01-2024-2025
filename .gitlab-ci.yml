@@ -76,7 +76,6 @@ deploy_to_ec2:
     - echo "$EC2_DEPLOY_KEY" > ~/.ssh/id_ed25519
     - chmod 400 ~/.ssh/id_ed25519
     - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
-    - export JAR_NAME=$(ls build/libs/*.jar | grep -v plain | xargs -n1 basename)
   script:
     - echo "Deploying to EC2 at $EC2_HOST"
     - scp -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no build/libs/$JAR_NAME $EC2_USER@$EC2_HOST:/home/ec2-user/
