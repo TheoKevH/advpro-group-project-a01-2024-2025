@@ -73,8 +73,8 @@ deploy_to_ec2:
     - chmod +x ./gradlew
     - ./gradlew clean bootJar
     - mkdir -p ~/.ssh
-    - echo "$EC2_DEPLOY_KEY" > ~/.ssh/adpro-key.pem
-    - chmod 600 ~/.ssh/adpro-key.pem
+    - echo "$EC2_DEPLOY_KEY" > ~/.ssh/new-key
+    - chmod 400 ~/.ssh/new-key
     - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
   script:
     - echo "Deploying to EC2 at $EC2_HOST"
