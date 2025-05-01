@@ -7,16 +7,6 @@ import id.ac.ui.cs.advprog.buildingstore.supplier_management.repository.Supplier
 import org.springframework.stereotype.Service;
 
 @Service
-public class SupplierService {
-
-    private final SupplierRepository supplierRepository;
-
-    public SupplierService(SupplierRepository supplierRepository) {
-        this.supplierRepository = supplierRepository;
-    }
-
-    public void addSupplier(SupplierDTO dto) {
-        Supplier supplier = SupplierFactory.fromDTO(dto);
-        supplierRepository.save(supplier);
-    }
+public interface SupplierService {
+    void addSupplier(SupplierDTO dto);
 }
