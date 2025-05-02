@@ -42,4 +42,38 @@ class SupplierServiceTest {
         assertEquals("08123456789", savedSupplier.getContact());
         assertEquals("Elektronik", savedSupplier.getCategory());
     }
+
+    @Test
+    void editSupplier_shouldUpdateAndSaveCorrectly() {
+        Long supplierId = 1L;
+        Supplier existingSupplier = Supplier.builder()
+                .id(supplierId)
+                .name("PT Lama")
+                .address("Jakarta")
+                .contact("0811111111")
+                .category("Lama")
+                .build();
+
+        SupplierDTO updatedDTO = new SupplierDTO(
+                "PT Baru",
+                "Bandung",
+                "0822222222",
+                "Elektronik"
+        );
+
+        when(repo.findById(supplierId)).thenReturn(Optional.of(existingSupplier));
+
+        supplierService.editSupplier(supplierId, updatedDTO);
+
+        ArgumentCaptor<Supplier> captor = ArgumentCaptor.forClass(Supplier.class);
+        verify(repo).save(captor.capture());
+
+        Supplier updated = captor.getValue();
+        assertEquals(supplierId, updated.getId());
+        assertEquals("PT Baru", updated.getName());
+        assertEquals("Bandung", updated.getAddress());
+        assertEquals("0822222222", updated.getContact());
+        assertEquals("Elektronik", updated.getCategory());
+    }
+
 }

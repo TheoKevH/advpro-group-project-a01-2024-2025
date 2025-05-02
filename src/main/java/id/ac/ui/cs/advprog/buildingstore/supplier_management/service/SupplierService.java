@@ -9,4 +9,5 @@ import org.springframework.stereotype.Service;
 @Service
 public interface SupplierService {
     void addSupplier(SupplierDTO dto);
+    void editSupplier(Long id, SupplierDTO dto);
 }
