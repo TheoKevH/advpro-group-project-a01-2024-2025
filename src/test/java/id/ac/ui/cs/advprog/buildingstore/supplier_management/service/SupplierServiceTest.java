@@ -78,4 +78,28 @@ class SupplierServiceTest {
         assertEquals("Elektronik", updated.getCategory());
     }
 
+    @Test
+    void deleteSupplier_shouldCallRepositoryDeleteById() {
+        Long id = 1L;
+        when(repo.existsById(id)).thenReturn(true);
+
+        supplierService.deleteSupplier(id);
+
+        verify(repo).deleteById(id);
+    }
+
+    @Test
+    void deleteSupplier_shouldThrowExceptionIfSupplierNotFound() {
+        Long id = 99L;
+        when(repo.existsById(id)).thenReturn(false);
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                supplierService.deleteSupplier(id)
+        );
+
+        assertEquals("Supplier with id 99 not found", ex.getMessage());
+    }
+
+
+
 }
