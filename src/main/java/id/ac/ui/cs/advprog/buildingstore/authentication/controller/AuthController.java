@@ -1,21 +1,18 @@
 package id.ac.ui.cs.advprog.buildingstore.authentication.controller;
-import org.springframework.ui.Model;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+
 import id.ac.ui.cs.advprog.buildingstore.authentication.dto.RegisterRequest;
-import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
-import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class AuthController {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
     @GetMapping("/login")
@@ -31,12 +28,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public String registerUser(@ModelAttribute RegisterRequest request) {
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(request.getRole());
-        userRepository.save(user);
+        authService.register(request);
         return "redirect:/login";
     }
-
 }
