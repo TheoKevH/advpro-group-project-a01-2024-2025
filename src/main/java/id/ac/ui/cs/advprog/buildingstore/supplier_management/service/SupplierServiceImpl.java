@@ -19,31 +19,45 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Override
     public void addSupplier(SupplierDTO dto) {
-        if (dto == null) {
-            throw new IllegalArgumentException("SupplierDTO cannot be null");
-        }
-
+        validateDTO(dto);
         Supplier supplier = SupplierFactory.fromDTO(dto);
-        log.info("Saving supplier: {}", supplier.getName());
+        log.info("Saving new supplier: {}", supplier.getName());
         repo.save(supplier);
     }
 
     @Override
     public void editSupplier(Long id, SupplierDTO dto) {
+        validateId(id);
+        validateDTO(dto);
+
+        Supplier supplier = getSupplierOrThrow(id);
+        updateSupplierFromDTO(supplier, dto);
+
+        log.info("Updating supplier with id {}: {}", id, dto.getName());
+        repo.save(supplier);
+    }
+
+    private void validateDTO(SupplierDTO dto) {
         if (dto == null) {
             throw new IllegalArgumentException("SupplierDTO cannot be null");
         }
-
-        Supplier existingSupplier = repo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Supplier not found"));
-
-        existingSupplier.setName(dto.getName());
-        existingSupplier.setAddress(dto.getAddress());
-        existingSupplier.setContact(dto.getContact());
-        existingSupplier.setCategory(dto.getCategory());
-
-        log.info("Updating supplier with id {}: {}", id, dto.getName());
-        repo.save(existingSupplier);
     }
 
+    private void validateId(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Supplier ID cannot be null");
+        }
+    }
+
+    private Supplier getSupplierOrThrow(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Supplier with id " + id + " not found"));
+    }
+
+    private void updateSupplierFromDTO(Supplier supplier, SupplierDTO dto) {
+        supplier.setName(dto.getName());
+        supplier.setAddress(dto.getAddress());
+        supplier.setContact(dto.getContact());
+        supplier.setCategory(dto.getCategory());
+    }
 }
