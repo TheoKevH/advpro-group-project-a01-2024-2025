@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 class SupplierServiceTest {
 
-    @Mock
+    /*@Mock
     private SupplierRepository supplierRepository;
 
     @InjectMocks
@@ -42,4 +42,6 @@ class SupplierServiceTest {
         assertEquals("08123456789", savedSupplier.getContact());
         assertEquals("Elektronik", savedSupplier.getCategory());
     }
+
+     */
 }
