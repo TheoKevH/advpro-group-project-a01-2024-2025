@@ -1,10 +1,25 @@
-package id.ac.ui.cs.advprog.buildingstore.authentication.dto;
-import id.ac.ui.cs.advprog.buildingstore.authentication.model.Role;
+package id.ac.ui.cs.advprog.buildingstore.authentication.model;
+import jakarta.persistence.*;
 
-public class RegisterRequest {
+
+@Entity
+public class User {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String username;
     private String password;
+
+    @Enumerated(EnumType.STRING)
     private Role role;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getUsername() {
         return username;
