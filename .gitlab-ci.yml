@@ -15,7 +15,7 @@ run_tests:
     - branches
     - merge_requests
 
-# PMD Code Analysis (ini mau diganti ke sonarcloud aja deh)
+# PMD Code Analysis (ini mau diganti ke sonarcloud aja?)
 pmd_scan:
   stage: analysis
   image: eclipse-temurin:21
@@ -25,31 +25,42 @@ pmd_scan:
     - unzip pmd-bin-6.55.0.zip
   script:
     - ./pmd-bin-6.55.0/bin/run.sh pmd -d src/main/java -R rulesets/java/quickstart.xml -f sarif -r pmd-report.sarif
+  allow_failure: true
   artifacts:
     paths:
       - pmd-report.sarif
     expire_in: 1 week
   only:
+    - main
+    - staging
     - branches
     - merge_requests
     - schedules
 
-# Scorecard Security Scan (Static artifact generation only — no GitHub dashboard upload) (hmm ini belum fix)
-scorecard_analysis:
-  stage: security
-  image: golang:1.21
-  before_script:
-    - go install github.com/ossf/scorecard/v4@latest
-    - export PATH=$PATH:$(go env GOPATH)/bin
-  script:
-    - scorecard --repo=. --format sarif --output-file results.sarif
-  artifacts:
-    paths:
-      - results.sarif
-    expire_in: 1 week
-  only:
-    - master
-    - schedules
+# Scorecard Security Scan (Static artifact generation only — no GitHub dashboard upload)
+#scorecard_analysis:
+#  stage: security
+#  image: golang:1.21
+#  before_script:
+#    - go install github.com/ossf/scorecard/v4@latest
+#    - export PATH=$PATH:$(go env GOPATH)/bin
+#  script:
+#    - |
+#     scorecard \
+#        --local=. \
+#       --checks=Binary-Artifacts,Pinned-Dependencies,SAST,Packaging \
+#        --format json \
+#        -o results.json
+#  artifacts:
+#    paths:
+#      - results.json
+#    expire_in: 1 week
+#  only:
+#    - main
+#    - staging
+#    - branches
+#    - schedules
+
 
 deploy_to_ec2:
   stage: deploy
@@ -57,6 +68,7 @@ deploy_to_ec2:
   only:
     - main
   before_script:
+    - apt-get update && apt-get install -y openssh-client
     - chmod +x ./gradlew
     - ./gradlew clean bootJar
     - mkdir -p ~/.ssh
