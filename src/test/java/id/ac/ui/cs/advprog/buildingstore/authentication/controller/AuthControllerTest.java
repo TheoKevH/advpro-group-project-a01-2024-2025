@@ -36,14 +36,6 @@ public class AuthControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
-    public void dummyLogin_ShouldAccessDashboard() throws Exception {
-        mockMvc.perform(get("/dashboard"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Dashboard")));
-    }
-
-    @Test
     public void login_WithInvalidCredentials_ShouldRedirectToLoginWithError() throws Exception {
         mockMvc.perform(post("/login")
                         .param("username", "salahuser")
@@ -51,6 +43,22 @@ public class AuthControllerTest {
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?error"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    public void admin_ShouldAccessAdminDashboard() throws Exception {
+        mockMvc.perform(get("/admin/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Admin Dashboard")));
+    }
+
+    @Test
+    @WithMockUser(username = "kasir", roles = {"CASHIER"})
+    public void cashier_ShouldAccessCashierDashboard() throws Exception {
+        mockMvc.perform(get("/cashier/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Cashier Dashboard")));
     }
 
 
