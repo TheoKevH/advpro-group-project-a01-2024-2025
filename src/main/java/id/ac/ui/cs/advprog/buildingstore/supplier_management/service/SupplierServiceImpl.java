@@ -37,6 +37,15 @@ public class SupplierServiceImpl implements SupplierService {
         repo.save(supplier);
     }
 
+    @Override
+    public void deleteSupplier(Long id) {
+        if (!repo.existsById(id)) {
+            throw new IllegalArgumentException("Supplier with id " + id + " not found");
+        }
+
+        repo.deleteById(id);
+    }
+
     private void validateDTO(SupplierDTO dto) {
         if (dto == null) {
             throw new IllegalArgumentException("SupplierDTO cannot be null");
