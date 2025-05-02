@@ -31,4 +31,9 @@ public class AuthController {
         authService.register(request);
         return "redirect:/login";
     }
+
+    @GetMapping("/dashboard")
+    public String dashboardPage() {
+        return "dashboard";
+    }
 }
