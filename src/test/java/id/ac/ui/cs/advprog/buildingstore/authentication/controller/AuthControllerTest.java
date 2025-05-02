@@ -44,6 +44,17 @@ public class AuthControllerTest {
     }
 
     @Test
+    public void login_WithInvalidCredentials_ShouldRedirectToLoginWithError() throws Exception {
+        mockMvc.perform(post("/login")
+                        .param("username", "salahuser")
+                        .param("password", "salahpass")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?error"));
+    }
+
+
+    @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     public void registerPage_ShouldReturnOkAndContainRegisterForm() throws Exception {
         mockMvc.perform(get("/register"))
