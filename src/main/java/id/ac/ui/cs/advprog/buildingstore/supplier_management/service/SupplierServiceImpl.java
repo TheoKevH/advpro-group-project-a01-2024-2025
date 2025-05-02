@@ -39,10 +39,10 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Override
     public void deleteSupplier(Long id) {
-        if (!repo.existsById(id)) {
-            throw new IllegalArgumentException("Supplier with id " + id + " not found");
-        }
+        validateId(id);
+        checkSupplierExists(id);
 
+        log.info("Deleting supplier with id {}", id);
         repo.deleteById(id);
     }
 
@@ -61,6 +61,12 @@ public class SupplierServiceImpl implements SupplierService {
     private Supplier getSupplierOrThrow(Long id) {
         return repo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Supplier with id " + id + " not found"));
+    }
+
+    private void checkSupplierExists(Long id) {
+        if (!repo.existsById(id)) {
+            throw new IllegalArgumentException("Supplier with id " + id + " not found");
+        }
     }
 
     private void updateSupplierFromDTO(Supplier supplier, SupplierDTO dto) {
