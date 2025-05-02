@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.buildingstore.authentication.controller;
 
 import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepository;
+import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -20,6 +21,7 @@ public class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean private AuthService authService;
     @MockBean private UserRepository userRepository;
     @MockBean private PasswordEncoder passwordEncoder;
 
