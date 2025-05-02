@@ -78,10 +78,8 @@ deploy_to_ec2:
     - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
   script:
     - echo "Deploying to EC2 at $EC2_HOST"
-    - ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "
-      pkill -f $JAR_NAME || true
-      "
     - scp -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no build/libs/$JAR_NAME $EC2_USER@$EC2_HOST:/home/ec2-user/
     - ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "
+      pkill -f $JAR_NAME || true &&
       nohup java -jar $JAR_NAME > /home/ec2-user/app.log 2>&1 &
       "
