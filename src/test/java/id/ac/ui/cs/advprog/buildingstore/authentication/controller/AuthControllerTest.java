@@ -61,6 +61,12 @@ public class AuthControllerTest {
                 .andExpect(content().string(containsString("Cashier Dashboard")));
     }
 
+//    @Test
+//    @WithMockUser(username = "kasir", roles = {"CASHIER"})
+//    public void cashier_ShouldBeForbiddenFromAdminDashboard() throws Exception {
+//        mockMvc.perform(get("/admin/dashboard"))
+//                .andExpect(status().isForbidden());
+//    }
 
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
