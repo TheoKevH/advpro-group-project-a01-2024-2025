@@ -20,7 +20,10 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/login", "/register", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/cashier/**").hasRole("CASHIER")
+
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -30,6 +33,7 @@ public class WebSecurityConfig {
                 )
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login?logout")
+                        .permitAll()
                 );
 
         return http.build();
