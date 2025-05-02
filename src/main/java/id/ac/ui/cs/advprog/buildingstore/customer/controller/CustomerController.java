@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 
 @Controller
-@RequestMapping
+@RequestMapping("/customer")
 public class CustomerController {
     @Autowired
     private CustomerService customerService;
@@ -22,7 +22,7 @@ public class CustomerController {
     public String registerCustomerPage(Model model) {
         Customer customer = new Customer();
         model.addAttribute("customer", customer);
-        return "registerCustomer";
+        return "customer/registerCustomer";
     }
 
     @PostMapping("/register")
@@ -35,6 +35,6 @@ public class CustomerController {
     public String listCustomers(Model model) {
         List<Customer> customers = customerService.getAllCustomers();
         model.addAttribute("customers", customers);
-        return "listCustomers";
+        return "customer/listCustomers";
     }
 }
