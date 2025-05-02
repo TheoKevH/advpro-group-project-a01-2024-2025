@@ -27,4 +27,23 @@ public class SupplierServiceImpl implements SupplierService {
         log.info("Saving supplier: {}", supplier.getName());
         repo.save(supplier);
     }
+
+    @Override
+    public void editSupplier(Long id, SupplierDTO dto) {
+        if (dto == null) {
+            throw new IllegalArgumentException("SupplierDTO cannot be null");
+        }
+
+        Supplier existingSupplier = repo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Supplier not found"));
+
+        existingSupplier.setName(dto.getName());
+        existingSupplier.setAddress(dto.getAddress());
+        existingSupplier.setContact(dto.getContact());
+        existingSupplier.setCategory(dto.getCategory());
+
+        log.info("Updating supplier with id {}: {}", id, dto.getName());
+        repo.save(existingSupplier);
+    }
+
 }
