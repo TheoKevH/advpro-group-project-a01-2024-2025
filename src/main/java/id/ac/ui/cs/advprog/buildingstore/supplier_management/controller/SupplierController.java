@@ -27,4 +27,10 @@ public class SupplierController {
         supplierService.addSupplier(dto);
         return "redirect:/supplier/list";
     }
+
+    @PostMapping("/edit/{id}")
+    public String editSupplier(@PathVariable("id") Long id, @ModelAttribute SupplierDTO dto) {
+        supplierService.editSupplier(id, dto);
+        return "redirect:/supplier/list";
+    }
 }
