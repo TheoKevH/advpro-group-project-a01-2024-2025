@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 import java.util.List;
@@ -63,5 +65,23 @@ class SupplierControllerTest {
 
         verify(supplierService).addSupplier(Mockito.any(SupplierDTO.class));
     }
+
+    @Test
+    @WithMockUser
+    void editSupplier_shouldUpdateAndRedirect() throws Exception {
+        Long supplierId = 1L;
+        SupplierDTO updatedDTO = new SupplierDTO("PT Update", "Jakarta", "0812121212", "Furniture");
+
+        mockMvc.perform(post("/supplier/edit/" + supplierId)
+                        .param("name", updatedDTO.getName())
+                        .param("address", updatedDTO.getAddress())
+                        .param("contact", updatedDTO.getContact())
+                        .param("category", updatedDTO.getCategory())
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection());
+
+        verify(supplierService).editSupplier(eq(supplierId), Mockito.<SupplierDTO>any());
+    }
+
 
 }
