@@ -88,4 +88,37 @@ public class AuthControllerTest {
                 .andExpect(redirectedUrl("/login"));
     }
 
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    public void changePasswordPage_ShouldReturnOkAndContainForm() throws Exception {
+        mockMvc.perform(get("/change-password"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Ubah Password")));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    public void changePassword_WithValidOldPassword_ShouldRedirectToSuccessPage() throws Exception {
+        mockMvc.perform(post("/change-password")
+                        .param("oldPassword", "admin123")
+                        .param("newPassword", "newpass")
+                        .param("confirmPassword", "newpass")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/change-password?success"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    public void changePassword_WithInvalidOldPassword_ShouldRedirectWithError() throws Exception {
+        mockMvc.perform(post("/change-password")
+                        .param("oldPassword", "wrongpass")
+                        .param("newPassword", "newpass")
+                        .param("confirmPassword", "newpass")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/change-password?error"));
+    }
+
+
 }
