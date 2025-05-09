@@ -50,7 +50,9 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Override
     public List<Supplier> getAllSuppliers() {
-        return repo.findAll();
+        List<Supplier> suppliers = repo.findAll();
+        log.info("Retrieved {} suppliers from database", suppliers.size());
+        return suppliers;
     }
 
     private void validateDTO(SupplierDTO dto) {
