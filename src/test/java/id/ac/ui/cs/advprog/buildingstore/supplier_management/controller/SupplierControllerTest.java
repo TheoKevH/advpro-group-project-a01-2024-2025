@@ -83,5 +83,15 @@ class SupplierControllerTest {
         verify(supplierService).editSupplier(eq(supplierId), Mockito.<SupplierDTO>any());
     }
 
+    @Test
+    @WithMockUser
+    void deleteSupplier_shouldDeleteAndRedirect() throws Exception {
+        Long supplierId = 1L;
 
+        mockMvc.perform(post("/supplier/delete/" + supplierId)
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection());
+
+        verify(supplierService).deleteSupplier(supplierId);
+    }
 }
