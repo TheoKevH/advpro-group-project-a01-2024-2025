@@ -100,6 +100,23 @@ class SupplierServiceTest {
         assertEquals("Supplier with id 99 not found", ex.getMessage());
     }
 
+    @Test
+    void getAllSuppliers_shouldReturnListOfSuppliers() {
+        List<Supplier> mockSuppliers = List.of(
+                Supplier.builder().id(1L).name("Supplier A").build(),
+                Supplier.builder().id(2L).name("Supplier B").build()
+        );
+
+        when(repo.findAll()).thenReturn(mockSuppliers);
+
+        List<Supplier> result = supplierService.getAllSuppliers();
+
+        assertEquals(2, result.size());
+        assertEquals("Supplier A", result.get(0).getName());
+        assertEquals("Supplier B", result.get(1).getName());
+    }
+
+
 
 
 }
