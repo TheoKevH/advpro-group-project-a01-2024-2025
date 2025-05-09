@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.buildingstore.supplier_management.controller;
 
+import id.ac.ui.cs.advprog.buildingstore.supplier_management.dto.SupplierDTO;
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.model.Supplier;
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.service.SupplierService;
 import org.junit.jupiter.api.Test;
@@ -9,12 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 import java.util.List;
 
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.hamcrest.Matchers.*;
 
 @WebMvcTest(SupplierController.class)
@@ -42,4 +46,22 @@ class SupplierControllerTest {
                 .andExpect(jsonPath("$[0].name", is("Supplier A")))
                 .andExpect(jsonPath("$[1].name", is("Supplier B")));
     }
+
+    @Test
+    @WithMockUser
+    void addSupplier_shouldCallService() throws Exception {
+        SupplierDTO dto = new SupplierDTO("PT Baru", "Bandung", "08123456789", "Elektronik");
+
+        mockMvc.perform(post("/supplier/add")
+                        .param("name", dto.getName())
+                        .param("address", dto.getAddress())
+                        .param("contact", dto.getContact())
+                        .param("category", dto.getCategory())
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection());
+
+
+        verify(supplierService).addSupplier(Mockito.any(SupplierDTO.class));
+    }
+
 }
