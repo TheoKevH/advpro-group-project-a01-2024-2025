@@ -7,6 +7,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -26,6 +27,7 @@ class SupplierControllerTest {
     private SupplierService supplierService;
 
     @Test
+    @WithMockUser
     void getAllSuppliers_shouldReturnListAsJson() throws Exception {
         List<Supplier> mockSuppliers = List.of(
                 Supplier.builder().id(1L).name("Supplier A").build(),
