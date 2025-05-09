@@ -1,10 +1,13 @@
 package id.ac.ui.cs.advprog.buildingstore.authentication.controller;
 
+import id.ac.ui.cs.advprog.buildingstore.authentication.dto.ChangePasswordRequest;
 import id.ac.ui.cs.advprog.buildingstore.authentication.dto.RegisterRequest;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @Controller
 public class AuthController {
@@ -41,5 +44,19 @@ public class AuthController {
     public String cashierDashboard() {
         return "cashier/dashboard";
     }
+
+    @GetMapping("/change-password")
+    public String changePasswordPage(Model model) {
+        model.addAttribute("changePasswordRequest", new ChangePasswordRequest());
+        return "change_password";
+    }
+
+    @PostMapping("/change-password")
+    public String changePassword(@ModelAttribute ChangePasswordRequest request, Principal principal) {
+        authService.changePassword(principal.getName(), request.getOldPassword(), request.getNewPassword());
+        return "redirect:/login?passwordChanged";
+    }
+
+
 
 }
