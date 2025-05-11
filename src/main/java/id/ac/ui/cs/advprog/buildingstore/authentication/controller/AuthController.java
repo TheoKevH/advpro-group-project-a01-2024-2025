@@ -64,10 +64,12 @@ public class AuthController {
     }
 
     @GetMapping("/profile")
-    public String profilePage(Model model) {
+    public String profilePage(Model model, Principal principal) {
+        model.addAttribute("username", principal.getName());
         model.addAttribute("changePasswordRequest", new ChangePasswordRequest());
         return "profile";
     }
+
 
 
 
