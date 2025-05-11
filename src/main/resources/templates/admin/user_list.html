@@ -6,5 +6,15 @@
 </head>
 <body>
 <h1>User List</h1>
+<table>
+    <tr>
+        <th>Username</th>
+        <th>Role</th>
+    </tr>
+    <tr th:each="user : ${users}">
+        <td th:text="${user.username}">username</td>
+        <td th:text="${user.role}">role</td>
+    </tr>
+</table>
 </body>
 </html>
