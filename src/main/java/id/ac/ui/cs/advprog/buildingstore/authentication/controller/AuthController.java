@@ -23,18 +23,6 @@ public class AuthController {
         return "login";
     }
 
-    @GetMapping("/register")
-    public String registerPage(Model model) {
-        model.addAttribute("registerRequest", new RegisterRequest());
-        return "register_user";
-    }
-
-    @PostMapping("/register")
-    public String registerUser(@ModelAttribute RegisterRequest request) {
-        authService.register(request);
-        return "redirect:/login";
-    }
-
     @GetMapping("/admin/dashboard")
     public String adminDashboard(Model model, Principal principal) {
         model.addAttribute("username", principal.getName());

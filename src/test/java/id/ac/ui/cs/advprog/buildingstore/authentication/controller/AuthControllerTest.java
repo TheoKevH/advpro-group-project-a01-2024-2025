@@ -65,33 +65,6 @@ public class AuthControllerTest {
                 .andExpect(content().string(containsString("Cashier Dashboard")));
     }
 
-//    @Test
-//    @WithMockUser(username = "kasir", roles = {"CASHIER"})
-//    public void cashier_ShouldBeForbiddenFromAdminDashboard() throws Exception {
-//        mockMvc.perform(get("/admin/dashboard"))
-//                .andExpect(status().isForbidden());
-//    }
-
-    @Test
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
-    public void registerPage_ShouldReturnOkAndContainRegisterForm() throws Exception {
-        mockMvc.perform(get("/register"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Register")));
-    }
-
-    @Test
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
-    public void registerUser_ShouldSaveUserAndRedirectToLogin() throws Exception {
-        mockMvc.perform(post("/register")
-                        .param("username", "kasir1")
-                        .param("password", "kasirpass")
-                        .param("role", "CASHIER")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
-    }
-
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     public void changePasswordPage_ShouldReturnOkAndContainForm() throws Exception {
