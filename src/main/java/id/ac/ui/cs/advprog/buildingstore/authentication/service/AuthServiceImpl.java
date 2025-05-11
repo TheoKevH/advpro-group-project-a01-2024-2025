@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.buildingstore.authentication.service;
 
+import id.ac.ui.cs.advprog.buildingstore.authentication.dto.ChangePasswordRequest;
 import id.ac.ui.cs.advprog.buildingstore.authentication.dto.RegisterRequest;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepository;
@@ -30,17 +31,23 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void changePassword(String username, String oldPassword, String newPassword) {
+    public void changePassword(ChangePasswordRequest request, String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Old password is incorrect");
         }
 
-        user.setPassword(passwordEncoder.encode(newPassword));
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("Password confirmation does not match");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
-
-
 }
+
+
+
+

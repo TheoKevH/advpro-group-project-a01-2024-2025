@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav>
+    <ul>
+        <li th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+            <a th:href="@{/admin/dashboard}">Admin Dashboard</a>
+        </li>
+        <li th:if="${#authorization.expression('hasRole(''CASHIER'')')}">
+            <a th:href="@{/cashier/dashboard}">Cashier Dashboard</a>
+        </li>
+        <li><a th:href="@{/profile}">Profile</a></li>
+        <li>
+            <form th:action="@{/logout}" method="post" style="display:inline">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit">Logout</button>
+            </form>
+        </li>
+    </ul>
+</nav>
+</body>
+</html>

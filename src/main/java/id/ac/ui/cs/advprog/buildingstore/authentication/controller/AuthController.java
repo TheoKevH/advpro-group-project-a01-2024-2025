@@ -53,8 +53,18 @@ public class AuthController {
 
     @PostMapping("/change-password")
     public String changePassword(@ModelAttribute ChangePasswordRequest request, Principal principal) {
-        authService.changePassword(principal.getName(), request.getOldPassword(), request.getNewPassword());
-        return "redirect:/login?passwordChanged";
+        try {
+            authService.changePassword(request, principal.getName());
+            return "redirect:/profile?success";
+        } catch (Exception e) {
+            return "redirect:/profile?error";
+        }
+    }
+
+    @GetMapping("/profile")
+    public String profilePage(Model model) {
+        model.addAttribute("changePasswordRequest", new ChangePasswordRequest());
+        return "profile";
     }
 
 
