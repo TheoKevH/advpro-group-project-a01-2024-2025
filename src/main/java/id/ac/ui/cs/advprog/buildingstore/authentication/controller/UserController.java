@@ -36,7 +36,7 @@ public class UserController {
         if (result.hasErrors()) {
             model.addAttribute("registerRequest", request);
             return "admin/register_user";
-        }g
+        }
         authService.register(request);
         return "redirect:/admin/users";
     }

@@ -43,7 +43,7 @@ public class UserControllerTest {
     public void registerForm_ShouldReturnRegisterView() throws Exception {
         mockMvc.perform(get("/admin/users/register"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("admin/user_register"))
+                .andExpect(view().name("admin/register_user"))
                 .andExpect(content().string(containsString("Register New User")));
     }
 
