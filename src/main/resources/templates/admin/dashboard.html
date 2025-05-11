@@ -11,7 +11,8 @@
 
 <nav>
     <ul>
-        <li><a th:href="@{/register}">Add New User</a></li>
+        <li><a th:href="@{/admin/users}">User List</a></li>
+        <li><a th:href="@{/admin/users/register}">Add New User</a></li>
         <li><a th:href="@{/profile}">Profile</a></li>
         <li>
             <form th:action="@{/logout}" method="post">

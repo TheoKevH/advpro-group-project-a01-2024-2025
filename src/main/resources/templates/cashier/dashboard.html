@@ -1,11 +1,25 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Cashier Dashboard</title>
 </head>
 <body>
 <h1>Cashier Dashboard</h1>
-<p>Welcome, cashier!</p>
-<a th:href="@{/logout}">Logout</a>
+
+<p>Welcome, <span th:text="${username}">cashier</span>!</p>
+
+<nav>
+    <ul>
+        <li><a th:href="@{/profile}">Profile</a></li>
+        <li>
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit">Logout</button>
+            </form>
+        </li>
+    </ul>
+</nav>
+
 </body>
 </html>
