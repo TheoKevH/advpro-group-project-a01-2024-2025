@@ -11,8 +11,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
@@ -34,4 +37,28 @@ public class UserControllerTest {
                 .andExpect(view().name("admin/user_list"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("User List")));
     }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    public void registerForm_ShouldReturnRegisterView() throws Exception {
+        mockMvc.perform(get("/admin/users/register"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/user_register"))
+                .andExpect(content().string(containsString("Register New User")));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    public void registerUser_ShouldRedirectToUserList() throws Exception {
+        mockMvc.perform(post("/admin/users/register")
+                        .param("username", "newcashier")
+                        .param("password", "secret123")
+                        .param("role", "CASHIER")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/users"));
+    }
+
+
+
 }
