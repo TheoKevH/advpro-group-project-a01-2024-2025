@@ -7,6 +7,8 @@ import id.ac.ui.cs.advprog.buildingstore.supplier_management.repository.Supplier
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Slf4j
 @Service
 public class SupplierServiceImpl implements SupplierService {
@@ -44,6 +46,13 @@ public class SupplierServiceImpl implements SupplierService {
 
         log.info("Deleting supplier with id {}", id);
         repo.deleteById(id);
+    }
+
+    @Override
+    public List<Supplier> getAllSuppliers() {
+        List<Supplier> suppliers = repo.findAll();
+        log.info("Retrieved {} suppliers from database", suppliers.size());
+        return suppliers;
     }
 
     private void validateDTO(SupplierDTO dto) {

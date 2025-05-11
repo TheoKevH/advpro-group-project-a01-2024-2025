@@ -1,9 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Dashboard</title>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
 </head>
 <body>
 <h1>Admin Dashboard</h1>
+
+<p>Welcome, <span th:text="${username}"></span></p>
+
+<nav>
+    <ul>
+        <li><a th:href="@{/admin/users}">User List</a></li>
+        <li><a th:href="@{/admin/users/register}">Add New User</a></li>
+        <li><a th:href="@{/profile}">Profile</a></li>
+        <li>
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit">Logout</button>
+            </form>
+        </li>
+    </ul>
+</nav>
+
 </body>
 </html>

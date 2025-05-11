@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.buildingstore.authentication.controller;
 
+import id.ac.ui.cs.advprog.buildingstore.authentication.dto.ChangePasswordRequest;
 import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepository;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.security.test.context.support.WithMockUser;
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -61,31 +65,42 @@ public class AuthControllerTest {
                 .andExpect(content().string(containsString("Cashier Dashboard")));
     }
 
-//    @Test
-//    @WithMockUser(username = "kasir", roles = {"CASHIER"})
-//    public void cashier_ShouldBeForbiddenFromAdminDashboard() throws Exception {
-//        mockMvc.perform(get("/admin/dashboard"))
-//                .andExpect(status().isForbidden());
-//    }
-
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
-    public void registerPage_ShouldReturnOkAndContainRegisterForm() throws Exception {
-        mockMvc.perform(get("/register"))
+    public void changePasswordPage_ShouldReturnOkAndContainForm() throws Exception {
+        mockMvc.perform(get("/change-password"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Register")));
+                .andExpect(content().string(containsString("Change Password")));
     }
 
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
-    public void registerUser_ShouldSaveUserAndRedirectToLogin() throws Exception {
-        mockMvc.perform(post("/register")
-                        .param("username", "kasir1")
-                        .param("password", "kasirpass")
-                        .param("role", "CASHIER")
+    public void changePassword_WithValidInputs_ShouldRedirectWithSuccess() throws Exception {
+        mockMvc.perform(post("/change-password")
+                        .param("oldPassword", "oldpass")
+                        .param("newPassword", "newpass")
+                        .param("confirmPassword", "newpass")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));
+                .andExpect(redirectedUrl("/profile?success"));
     }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    public void changePassword_WithMismatchedConfirm_ShouldRedirectWithError() throws Exception {
+        doThrow(new IllegalArgumentException("Password confirmation does not match"))
+                .when(authService)
+                .changePassword(any(ChangePasswordRequest.class), eq("admin"));
+
+        mockMvc.perform(post("/change-password")
+                        .param("oldPassword", "oldpass")
+                        .param("newPassword", "newpass")
+                        .param("confirmPassword", "wrongconfirm")
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/profile?error"));
+    }
+
+
 
 }
