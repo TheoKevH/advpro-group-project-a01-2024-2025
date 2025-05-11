@@ -36,12 +36,14 @@ public class AuthController {
     }
 
     @GetMapping("/admin/dashboard")
-    public String adminDashboard() {
+    public String adminDashboard(Model model, Principal principal) {
+        model.addAttribute("username", principal.getName());
         return "admin/dashboard";
     }
 
     @GetMapping("/cashier/dashboard")
-    public String cashierDashboard() {
+    public String cashierDashboard(Model model, Principal principal) {
+        model.addAttribute("username", principal.getName());
         return "cashier/dashboard";
     }
 
