@@ -14,4 +14,6 @@
 
 ## Future Architecture after Risk Storming
 
+### Future Deployment Diagram
+![New Deployment Diagram](deploymentdiagram2.png)
 ## Penjelasan
