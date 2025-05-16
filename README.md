@@ -15,4 +15,8 @@ Context Diagram
 
 ## Future Architecture after Risk Storming
 
+Context Diagram
+![context diagram admin](context_admin.jpeg)
+![context diagram cashier](context_cashier.jpeg)
+
 ## Penjelasan
