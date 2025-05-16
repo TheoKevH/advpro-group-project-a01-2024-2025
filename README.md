@@ -9,10 +9,16 @@
 
 ## Current Architecture
 
+### Container Diagram
+![Container Diagram](currentcontainer.png)
+
 ### Deployment Diagram
 ![Deployment Diagram](deploymentdiagram1.png)
 
 ## Future Architecture after Risk Storming
+
+### Future Container Diagram
+![New Container Diagram](deploymentdiagram2.png)
 
 ### Future Deployment Diagram
 ![New Deployment Diagram](deploymentdiagram2.png)
