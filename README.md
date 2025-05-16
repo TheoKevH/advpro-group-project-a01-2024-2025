@@ -16,4 +16,13 @@
 
 ### Future Deployment Diagram
 ![New Deployment Diagram](deploymentdiagram2.png)
+
 ## Penjelasan
+
+## Individual Deliverables (Theodore Kevin Himawan)
+
+### Component Diagram
+![Component Diagram](componentdiagramkevin.png)
+
+### Code Diagram
+![Code Diagram](codediagramkevin.png)
