@@ -7,13 +7,10 @@
 - **Franky Raymarcell Sinaga (2306227311)**: Penjelasan 2 - 3 Paragraf
 - **Theodore Kevin Himawan (2306210973)**: Deployment Diagram
 
-## Current Architecture
+## Individual Deliverables (Dicky Bayu Sadewo)
 
-### Deployment Diagram
-![Deployment Diagram](deploymentdiagram1.png)
+### Component Diagram
+![Component Diagram](componentdiagramdicky.png)
 
-## Future Architecture after Risk Storming
-
-### Future Deployment Diagram
-![New Deployment Diagram](deploymentdiagram2.png)
-## Penjelasan
+### Code Diagram
+![Code Diagram](codediagramdicky.png)
