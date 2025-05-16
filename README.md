@@ -25,6 +25,9 @@
 ![context diagram admin future](context_admin_future.jpeg)
 ![context diagram cashier future](context_cashier_future.jpeg)
 
+### Future Container Diagram
+![New Container Diagram](futurecontainerdiagram.png)
+
 ### Future Deployment Diagram
 ![New Deployment Diagram](deploymentdiagram2.png)
 
