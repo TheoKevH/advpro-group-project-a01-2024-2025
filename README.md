@@ -9,6 +9,9 @@
 
 ## Current Architecture
 
+### Deployment Diagram
+![Deployment Diagram](deploymentdiagram1.png)
+
 ## Future Architecture after Risk Storming
 
 ## Penjelasan
