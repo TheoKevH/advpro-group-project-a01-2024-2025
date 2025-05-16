@@ -9,6 +9,10 @@
 
 ## Current Architecture
 
+### Context Diagram
+![context diagram admin](context_admin.jpeg)
+![context diagram cashier](context_cashier.jpeg)
+
 ### Container Diagram
 ![Container Diagram](currentcontainer.png)
 
@@ -17,9 +21,11 @@
 
 ## Future Architecture after Risk Storming
 
-### Future Container Diagram
-![New Container Diagram](deploymentdiagram2.png)
+### Future Context Diagram
+![context diagram admin future](context_admin_future.jpeg)
+![context diagram cashier future](context_cashier_future.jpeg)
 
 ### Future Deployment Diagram
 ![New Deployment Diagram](deploymentdiagram2.png)
+
 ## Penjelasan
