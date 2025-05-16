@@ -9,6 +9,10 @@
 
 ## Current Architecture
 
+Context Diagram
+![context diagram admin](context_admin.jpeg)
+![context diagram cashier](context_cashier.jpeg)
+
 ## Future Architecture after Risk Storming
 
 ## Penjelasan
