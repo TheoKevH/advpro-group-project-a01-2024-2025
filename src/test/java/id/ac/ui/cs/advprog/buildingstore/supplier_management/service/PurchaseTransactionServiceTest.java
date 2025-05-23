@@ -52,4 +52,34 @@ class PurchaseTransactionServiceTest {
         assertThat(saved.getQuantity()).isEqualTo(120);
         assertThat(saved.getSupplier()).isEqualTo(supplier);
     }
+
+    @Test
+    void getTransactionsBySupplier_shouldReturnOnlyMatchingTransactions() {
+        Supplier supplier1 = Supplier.builder().id(1L).name("PT Semen").category(SupplierCategory.SEMEN).build();
+        Supplier supplier2 = Supplier.builder().id(2L).name("PT Kayu").category(SupplierCategory.KAYU).build();
+
+        PurchaseTransaction tx1 = PurchaseTransaction.builder()
+                .supplier(supplier1)
+                .productName("Semen A")
+                .quantity(50)
+                .totalPrice(new BigDecimal("1000000"))
+                .date(LocalDateTime.now())
+                .build();
+
+        PurchaseTransaction tx2 = PurchaseTransaction.builder()
+                .supplier(supplier2)
+                .productName("Kayu Jati")
+                .quantity(30)
+                .totalPrice(new BigDecimal("800000"))
+                .date(LocalDateTime.now())
+                .build();
+
+        when(transactionRepo.findAll()).thenReturn(List.of(tx1, tx2));
+
+        var result = service.getTransactionsBySupplier(supplier1);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0)).isEqualTo(tx1);
+    }
+
 }
