@@ -18,5 +18,6 @@ public class Supplier {
     private String name;
     private String address;
     private String contact;
-    private String category;
+    @Enumerated(EnumType.STRING)
+    private SupplierCategory category;
 }
