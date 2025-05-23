@@ -15,7 +15,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/supplier")
 @RequiredArgsConstructor
-public class TransactionController {
+public class SupplierTransactionController {
 
     private final PurchaseTransactionService transactionService;
     private final SupplierService supplierService;
@@ -27,6 +27,14 @@ public class TransactionController {
         model.addAttribute("supplier", supplier);
         model.addAttribute("transactions", transactions);
         return "admin/supplier_transactions";
+    }
+
+    @GetMapping("/{id}/transactions/add")
+    public String showAddTransactionForm(@PathVariable("id") Long supplierId, Model model) {
+        Supplier supplier = supplierService.findById(supplierId);
+        model.addAttribute("supplier", supplier);
+        model.addAttribute("transactionDTO", new PurchaseTransactionDTO());
+        return "admin/add_transaction";
     }
 
     @PostMapping("/{id}/transactions/add")
