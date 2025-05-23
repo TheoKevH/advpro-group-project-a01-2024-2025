@@ -75,7 +75,7 @@ class PurchaseTransactionServiceTest {
                 .date(LocalDateTime.now())
                 .build();
 
-        when(transactionRepo.findAll()).thenReturn(List.of(tx1, tx2));
+        when(transactionRepo.findBySupplier(supplier1)).thenReturn(List.of(tx1));
 
         var result = service.getTransactionsBySupplier(supplier1);
 

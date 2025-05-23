@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Controller
 @RequestMapping("/supplier")
@@ -22,14 +23,17 @@ public class SupplierTransactionController {
     private final SupplierService supplierService;
 
     @GetMapping("/{id}/transactions")
-    public String showSupplierTransactions(@PathVariable("id") Long supplierId, Model model) throws Exception {
-        Supplier supplier = supplierService.findById(supplierId);
-        CompletableFuture<List<PurchaseTransaction>> future = transactionService.getTransactionsBySupplierAsync(supplier);
-        List<PurchaseTransaction> transactions = future.get();
+    public String showSupplierTransactions(@PathVariable("id") Long supplierId, Model model) {
+        try {
+            Supplier supplier = supplierService.findById(supplierId);
+            List<PurchaseTransaction> transactions = transactionService.getTransactionsBySupplierAsync(supplier).get();
 
-        model.addAttribute("supplier", supplier);
-        model.addAttribute("transactions", transactions);
-        return "admin/supplier_transactions";
+            model.addAttribute("supplier", supplier);
+            model.addAttribute("transactions", transactions);
+            return "admin/supplier_transactions";
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Gagal mengambil data transaksi supplier", e);
+        }
     }
 
     @GetMapping("/{id}/transactions/add")

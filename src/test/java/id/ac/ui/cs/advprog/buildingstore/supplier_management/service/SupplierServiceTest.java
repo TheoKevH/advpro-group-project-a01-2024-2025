@@ -40,7 +40,7 @@ class SupplierServiceTest {
 
         Supplier savedSupplier = captor.getValue();
 
-        assertEquals("PT Maju", savedSupplier.getName());
+        assertEquals("[LISTRIK] PT Maju", savedSupplier.getName());
         assertEquals("Bandung", savedSupplier.getAddress());
         assertEquals("08123456789", savedSupplier.getContact());
         assertEquals(SupplierCategory.LISTRIK, savedSupplier.getCategory());

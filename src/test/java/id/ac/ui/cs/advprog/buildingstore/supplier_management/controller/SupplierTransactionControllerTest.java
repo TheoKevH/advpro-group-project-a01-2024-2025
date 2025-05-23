@@ -55,7 +55,8 @@ class SupplierTransactionControllerTest {
         );
 
         when(supplierService.findById(1L)).thenReturn(supplier);
-        when(transactionService.getTransactionsBySupplier(supplier)).thenReturn(transactions);
+        when(transactionService.getTransactionsBySupplierAsync(supplier))
+                .thenReturn(java.util.concurrent.CompletableFuture.completedFuture(transactions));
 
         String result = controller.showSupplierTransactions(1L, model);
 
