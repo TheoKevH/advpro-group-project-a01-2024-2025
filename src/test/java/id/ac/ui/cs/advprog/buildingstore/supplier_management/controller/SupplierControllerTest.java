@@ -2,6 +2,7 @@ package id.ac.ui.cs.advprog.buildingstore.supplier_management.controller;
 
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.dto.SupplierDTO;
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.model.Supplier;
+import id.ac.ui.cs.advprog.buildingstore.supplier_management.model.SupplierCategory;
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.service.SupplierService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -52,13 +53,13 @@ class SupplierControllerTest {
     @Test
     @WithMockUser
     void addSupplier_shouldCallService() throws Exception {
-        SupplierDTO dto = new SupplierDTO("PT Baru", "Bandung", "08123456789", "Elektronik");
+        SupplierDTO dto = new SupplierDTO("PT Baru", "Bandung", "08123456789", SupplierCategory.KAYU);
 
         mockMvc.perform(post("/supplier/add")
                         .param("name", dto.getName())
                         .param("address", dto.getAddress())
                         .param("contact", dto.getContact())
-                        .param("category", dto.getCategory())
+                        .param("category", dto.getCategory().name())
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection());
 
@@ -70,13 +71,13 @@ class SupplierControllerTest {
     @WithMockUser
     void editSupplier_shouldUpdateAndRedirect() throws Exception {
         Long supplierId = 1L;
-        SupplierDTO updatedDTO = new SupplierDTO("PT Update", "Jakarta", "0812121212", "Furniture");
+        SupplierDTO updatedDTO = new SupplierDTO("PT Update", "Jakarta", "0812121212", SupplierCategory.KAYU);
 
         mockMvc.perform(post("/supplier/edit/" + supplierId)
                         .param("name", updatedDTO.getName())
                         .param("address", updatedDTO.getAddress())
                         .param("contact", updatedDTO.getContact())
-                        .param("category", updatedDTO.getCategory())
+                        .param("category", updatedDTO.getCategory().name())
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection());
 
