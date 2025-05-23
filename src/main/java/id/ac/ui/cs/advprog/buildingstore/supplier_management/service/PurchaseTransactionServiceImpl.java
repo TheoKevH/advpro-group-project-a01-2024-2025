@@ -6,9 +6,11 @@ import id.ac.ui.cs.advprog.buildingstore.supplier_management.factory.PurchaseTra
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.model.Supplier;
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.repository.PurchaseTransactionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -25,5 +27,12 @@ public class PurchaseTransactionServiceImpl implements PurchaseTransactionServic
     @Override
     public List<PurchaseTransaction> getTransactionsBySupplier(Supplier supplier) {
         return transactionRepo.findBySupplier(supplier);
+    }
+
+    @Override
+    @Async
+    public CompletableFuture<List<PurchaseTransaction>> getTransactionsBySupplierAsync(Supplier supplier) {
+        List<PurchaseTransaction> list = transactionRepo.findBySupplier(supplier);
+        return CompletableFuture.completedFuture(list);
     }
 }
