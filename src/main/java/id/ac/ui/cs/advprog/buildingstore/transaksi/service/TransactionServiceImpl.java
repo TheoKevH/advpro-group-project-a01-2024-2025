@@ -13,6 +13,9 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private TransactionRepository repository;
 
+    @Autowired
+    private AsyncTransactionLogger asyncTransactionLogger;
+
 
     @Override
     public Transaction createTransaction() {
@@ -34,14 +37,18 @@ public class TransactionServiceImpl implements TransactionService {
     public Transaction moveToPayment(String id) {
         Transaction trx = repository.findById(id);
         trx.moveToPayment();
-        return repository.save(trx);
+        Transaction saved = repository.save(trx);
+        asyncTransactionLogger.logTransactionStatus(saved);
+        return saved;
     }
 
     @Override
     public Transaction markAsPaid(String id) {
         Transaction trx = repository.findById(id);
         trx.markAsPaid();
-        return repository.save(trx);
+        Transaction saved = repository.save(trx);
+        asyncTransactionLogger.logTransactionStatus(saved);
+        return saved;
     }
 
     @Override
@@ -49,5 +56,6 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction trx = repository.findById(id);
         trx.cancel();
         repository.save(trx);
+        asyncTransactionLogger.logTransactionStatus(trx);
     }
 }

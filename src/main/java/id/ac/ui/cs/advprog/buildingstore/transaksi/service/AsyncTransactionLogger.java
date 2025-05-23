@@ -9,8 +9,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class AsyncTransactionLogger {
 
+    // Async programming untuk log setiap perubahan status
     @Async
-    public void logTransactionCompletion(Transaction trx) {
-        log.info("Transaksi selesai (async log): ID={} Status={}", trx.getId(), trx.getStatus());
+    public void logTransactionStatus(Transaction trx) {
+        log.info("[LOG] Transaksi ID={} memiliki Status={}", trx.getId(), trx.getStatus());
     }
 }
