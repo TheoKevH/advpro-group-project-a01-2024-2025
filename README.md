@@ -7,8 +7,6 @@
 - **Franky Raymarcell Sinaga (2306227311)**: Penjelasan 2 - 3 Paragraf
 - **Theodore Kevin Himawan (2306210973)**: Deployment Diagram
 
-## Current Architecture
-
 ### Context Diagram
 ![context diagram admin](context_admin.jpeg)
 ![context diagram cashier](context_cashier.jpeg)
@@ -32,3 +30,11 @@
 ![New Deployment Diagram](deploymentdiagram2.png)
 
 ## Penjelasan
+
+## Individual Deliverables (Dicky Bayu Sadewo)
+
+### Component Diagram
+![Component Diagram](componentdiagramdicky.png)
+
+### Code Diagram
+![Code Diagram](codediagramdicky.png)

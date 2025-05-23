@@ -55,6 +55,12 @@ public class SupplierServiceImpl implements SupplierService {
         return suppliers;
     }
 
+    @Override
+    public Supplier findById(Long id) {
+        validateId(id);
+        return getSupplierOrThrow(id);
+    }
+
     private void validateDTO(SupplierDTO dto) {
         if (dto == null) {
             throw new IllegalArgumentException("SupplierDTO cannot be null");
