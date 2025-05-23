@@ -4,7 +4,6 @@ import id.ac.ui.cs.advprog.buildingstore.supplier_management.dto.PurchaseTransac
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.model.*;
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.service.PurchaseTransactionService;
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.service.SupplierService;
-import id.ac.ui.cs.advprog.buildingstore.supplier_management.controller.TransactionController;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,10 +17,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-class TransactionControllerTest {
+class SupplierTransactionControllerTest {
 
     @InjectMocks
-    private TransactionController controller;
+    private SupplierTransactionController controller;
 
     @Mock
     private PurchaseTransactionService transactionService;
