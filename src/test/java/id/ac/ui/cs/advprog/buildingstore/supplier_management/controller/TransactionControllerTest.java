@@ -4,7 +4,8 @@ import id.ac.ui.cs.advprog.buildingstore.supplier_management.dto.PurchaseTransac
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.model.*;
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.service.PurchaseTransactionService;
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.service.SupplierService;
-import id.ac.ui.cs.advprog.buildingstore.transaksi.controller.TransactionController;
+import id.ac.ui.cs.advprog.buildingstore.supplier_management.controller.TransactionController;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;

@@ -29,4 +29,13 @@ public class TransactionController {
         return "admin/supplier_transactions";
     }
 
+    @PostMapping("/{id}/transactions/add")
+    public String addTransaction(@PathVariable("id") Long supplierId,
+                                 @ModelAttribute PurchaseTransactionDTO dto) {
+        Supplier supplier = supplierService.findById(supplierId);
+        dto.setSupplier(supplier);
+        transactionService.addTransaction(dto);
+        return "redirect:/supplier/" + supplierId + "/transactions";
+    }
+
 }
