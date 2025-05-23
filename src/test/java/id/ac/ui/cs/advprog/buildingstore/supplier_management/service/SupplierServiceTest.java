@@ -2,6 +2,7 @@ package id.ac.ui.cs.advprog.buildingstore.supplier_management.service;
 
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.dto.SupplierDTO;
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.model.Supplier;
+import id.ac.ui.cs.advprog.buildingstore.supplier_management.model.SupplierCategory;
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.repository.SupplierRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ class SupplierServiceTest {
 
     @Test
     void addSupplier_shouldSaveSupplierToRepository() {
-        SupplierDTO dto = new SupplierDTO("PT Maju", "Bandung", "08123456789", "Elektronik");
+        SupplierDTO dto = new SupplierDTO("PT Maju", "Bandung", "08123456789", SupplierCategory.LISTRIK);
 
         supplierService.addSupplier(dto);
 
@@ -42,7 +43,7 @@ class SupplierServiceTest {
         assertEquals("PT Maju", savedSupplier.getName());
         assertEquals("Bandung", savedSupplier.getAddress());
         assertEquals("08123456789", savedSupplier.getContact());
-        assertEquals("Elektronik", savedSupplier.getCategory());
+        assertEquals(SupplierCategory.LISTRIK, savedSupplier.getCategory());
     }
 
     @Test
@@ -53,14 +54,14 @@ class SupplierServiceTest {
                 .name("PT Lama")
                 .address("Jakarta")
                 .contact("0811111111")
-                .category("Lama")
+                .category(SupplierCategory.KAYU)
                 .build();
 
         SupplierDTO updatedDTO = new SupplierDTO(
                 "PT Baru",
                 "Bandung",
                 "0822222222",
-                "Elektronik"
+                SupplierCategory.LISTRIK
         );
 
         when(repo.findById(supplierId)).thenReturn(Optional.of(existingSupplier));
@@ -75,7 +76,7 @@ class SupplierServiceTest {
         assertEquals("PT Baru", updated.getName());
         assertEquals("Bandung", updated.getAddress());
         assertEquals("0822222222", updated.getContact());
-        assertEquals("Elektronik", updated.getCategory());
+        assertEquals(SupplierCategory.LISTRIK, updated.getCategory());
     }
 
     @Test

@@ -7,6 +7,7 @@ import java.util.List;
 public interface AuthService {
     void register(RegisterRequest request);
     void changePassword(ChangePasswordRequest request, String username);
+    void deleteUser(Long id);
     List<User> getAllUsers();
 
 }

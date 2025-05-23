@@ -28,6 +28,7 @@
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Address</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Contact</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Category</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Transactions</th>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Actions</th>
                 </tr>
                 </thead>
@@ -37,11 +38,24 @@
                     <td class="px-6 py-4 text-gray-700" th:text="${supplier.address}">Address</td>
                     <td class="px-6 py-4 text-gray-700" th:text="${supplier.contact}">Contact</td>
                     <td class="px-6 py-4 text-gray-700" th:text="${supplier.category}">Category</td>
-                    <td class="px-6 py-4 space-x-3">
-                        <a th:href="@{'/supplier/edit/' + ${supplier.id}}" class="text-blue-600 hover:underline">Edit</a>
+                    <td class="px-6 py-4">
+                        <a th:href="@{'/supplier/' + ${supplier.id} + '/transactions'}"
+                           class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 text-sm font-medium transition">
+                            View
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 flex space-x-2">
+                        <a th:href="@{'/supplier/edit/' + ${supplier.id}}"
+                           class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 text-sm font-medium transition">
+                            Edit
+                        </a>
                         <form th:action="@{'/supplier/delete/' + ${supplier.id}}" method="post" class="inline">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            <button type="submit" class="text-red-600 hover:underline">Delete</button>
+                            <button type="submit"
+                                    onclick="return confirm('Yakin ingin menghapus supplier ini?')"
+                                    class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 text-sm font-medium transition">
+                                Delete
+                            </button>
                         </form>
                     </td>
                 </tr>
