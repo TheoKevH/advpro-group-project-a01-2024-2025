@@ -24,6 +24,11 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void register(RegisterRequest request) {
+        Optional<User> existingUser = userRepository.findByUsername(request.getUsername());
+        if (existingUser.isPresent()) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -47,6 +52,15 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
+
+    @Override
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new IllegalArgumentException("User not found");
+        }
+        userRepository.deleteById(id);
+    }
+
     @Override
     public List<User> getAllUsers() {
         return userRepository.findAll();
