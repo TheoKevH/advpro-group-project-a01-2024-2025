@@ -32,8 +32,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Build with Gradle
-        run: ./gradlew build
+      - name: Build with Gradle test, and generate test report
+        run: ./gradlew build jacocoTestReport
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -41,5 +41,5 @@ jobs:
           projectBaseDir: .
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: a01-adpro_buildingstore
-          SONAR_ORGANIZATION: a01-adpro
+          SONAR_PROJECT_KEY: a01-buildingstore_adpro
+          SONAR_ORGANIZATION: a01-buildingstore
