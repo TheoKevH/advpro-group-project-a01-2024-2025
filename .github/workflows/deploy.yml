@@ -45,4 +45,4 @@ jobs:
             sudo pkill -f caddy || true
             nohup sudo caddy start > /dev/null 2>&1 &
             
-            echo "Deployment successful"
+            echo "Deployment successful!"
