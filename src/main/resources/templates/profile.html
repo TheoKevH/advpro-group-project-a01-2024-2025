@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>My Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex">
+
+<!-- Sidebar -->
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<!-- Main Content -->
+<main class="flex-1 flex items-center justify-center p-6">
+    <div class="bg-white rounded-3xl shadow-xl max-w-md w-full p-10">
+        <h1 class="text-2xl font-bold mb-6 text-gray-900 text-center">My Profile</h1>
+
+        <p class="mb-6 text-center text-gray-700">Welcome, <span th:text="${username}" class="font-medium"></span></p>
+
+        <div th:if="${param.success}" class="mb-4 p-3 bg-green-100 text-green-800 rounded-lg font-semibold text-center">
+            Password successfully changed.
+        </div>
+        <div th:if="${param.error}" class="mb-4 p-3 bg-red-100 text-red-700 rounded-lg font-semibold text-center">
+            An error occurred while changing the password.
+        </div>
+
+        <form th:action="@{/change-password}" method="post" th:object="${changePasswordRequest}" class="space-y-6">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <div>
+                <label for="oldPassword" class="block mb-1 font-medium text-gray-700">Old Password:</label>
+                <input id="oldPassword" type="password" th:field="*{oldPassword}" required
+                       class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                       placeholder="Enter your old password" />
+            </div>
+
+            <div>
+                <label for="newPassword" class="block mb-1 font-medium text-gray-700">New Password:</label>
+                <input id="newPassword" type="password" th:field="*{newPassword}" required
+                       class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                       placeholder="Enter new password" />
+            </div>
+
+            <div>
+                <label for="confirmPassword" class="block mb-1 font-medium text-gray-700">Confirm New Password:</label>
+                <input id="confirmPassword" type="password" th:field="*{confirmPassword}" required
+                       class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                       placeholder="Confirm new password" />
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition">
+                Change Password
+            </button>
+        </form>
+    </div>
+</main>
+</body>
+</html>
