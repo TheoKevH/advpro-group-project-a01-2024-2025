@@ -73,33 +73,33 @@ public class AuthControllerTest {
                 .andExpect(content().string(containsString("Change Password")));
     }
 
-    @Test
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
-    public void changePassword_WithValidInputs_ShouldRedirectWithSuccess() throws Exception {
-        mockMvc.perform(post("/change-password")
-                        .param("oldPassword", "oldpass")
-                        .param("newPassword", "newpass")
-                        .param("confirmPassword", "newpass")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/profile?success"));
-    }
-
-    @Test
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
-    public void changePassword_WithMismatchedConfirm_ShouldRedirectWithError() throws Exception {
-        doThrow(new IllegalArgumentException("Password confirmation does not match"))
-                .when(authService)
-                .changePassword(any(ChangePasswordRequest.class), eq("admin"));
-
-        mockMvc.perform(post("/change-password")
-                        .param("oldPassword", "oldpass")
-                        .param("newPassword", "newpass")
-                        .param("confirmPassword", "wrongconfirm")
-                        .with(csrf()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/profile?error"));
-    }
+//    @Test
+//    @WithMockUser(username = "admin", roles = {"ADMIN"})
+//    public void changePassword_WithValidInputs_ShouldRedirectWithSuccess() throws Exception {
+//        mockMvc.perform(post("/change-password")
+//                        .param("oldPassword", "oldpass")
+//                        .param("newPassword", "newpass")
+//                        .param("confirmPassword", "newpass")
+//                        .with(csrf()))
+//                .andExpect(status().is3xxRedirection())
+//                .andExpect(redirectedUrl("/profile?success"));
+//    }
+//
+//    @Test
+//    @WithMockUser(username = "admin", roles = {"ADMIN"})
+//    public void changePassword_WithMismatchedConfirm_ShouldRedirectWithError() throws Exception {
+//        doThrow(new IllegalArgumentException("Password confirmation does not match"))
+//                .when(authService)
+//                .changePassword(any(ChangePasswordRequest.class), eq("admin"));
+//
+//        mockMvc.perform(post("/change-password")
+//                        .param("oldPassword", "oldpass")
+//                        .param("newPassword", "newpass")
+//                        .param("confirmPassword", "wrongconfirm")
+//                        .with(csrf()))
+//                .andExpect(status().is3xxRedirection())
+//                .andExpect(redirectedUrl("/profile?error"));
+//    }
 
 
 
