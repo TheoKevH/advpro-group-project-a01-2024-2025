@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.buildingstore.transaksi.service;
 
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
+import id.ac.ui.cs.advprog.buildingstore.transaksi.model.TransactionItem;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,9 +14,17 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private TransactionRepository repository;
 
+    @Autowired
+    private AsyncTransactionLogger asyncTransactionLogger;
+
+
     @Override
-    public Transaction createTransaction() {
-        Transaction transaction = new Transaction();
+    public Transaction createTransaction(String customerId, List<TransactionItem> items) {
+        Transaction transaction = Transaction.builder().
+                customerId(customerId).
+                items(items).
+                build();
+
         return repository.save(transaction);
     }
 
@@ -33,14 +42,18 @@ public class TransactionServiceImpl implements TransactionService {
     public Transaction moveToPayment(String id) {
         Transaction trx = repository.findById(id);
         trx.moveToPayment();
-        return repository.save(trx);
+        Transaction saved = repository.save(trx);
+        asyncTransactionLogger.logTransactionStatus(saved);
+        return saved;
     }
 
     @Override
     public Transaction markAsPaid(String id) {
         Transaction trx = repository.findById(id);
         trx.markAsPaid();
-        return repository.save(trx);
+        Transaction saved = repository.save(trx);
+        asyncTransactionLogger.logTransactionStatus(saved);
+        return saved;
     }
 
     @Override
@@ -48,5 +61,6 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction trx = repository.findById(id);
         trx.cancel();
         repository.save(trx);
+        asyncTransactionLogger.logTransactionStatus(trx);
     }
 }

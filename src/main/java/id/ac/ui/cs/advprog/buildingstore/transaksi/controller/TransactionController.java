@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.buildingstore.transaksi.controller;
 
+import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CreateTransactionRequest;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +17,8 @@ public class TransactionController {
     private final TransactionService service;
 
     @PostMapping
-    public ResponseEntity<Transaction> createTransaction() {
-        Transaction trx = service.createTransaction();
+    public ResponseEntity<Transaction> createTransaction(@RequestBody CreateTransactionRequest request) {
+        Transaction trx = service.createTransaction(request.getCustomerId(), request.getItems());
         return ResponseEntity.ok(trx);
     }
 
