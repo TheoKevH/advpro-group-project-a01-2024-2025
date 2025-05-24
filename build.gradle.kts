@@ -1,8 +1,8 @@
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
-    jacoco
 }
 
 group = "id.ac.ui.cs.advprog"
@@ -50,9 +50,10 @@ tasks.withType<Test> {
 }
 
 tasks.jacocoTestReport {
-    dependsOn(test)
+    dependsOn(tasks.named("test"))
     reports {
         xml.required.set(true)
         html.required.set(true)
     }
 }
+
