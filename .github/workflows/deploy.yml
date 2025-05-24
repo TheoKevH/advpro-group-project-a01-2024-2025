@@ -45,3 +45,5 @@ jobs:
             
             sudo caddy stop
             sudo caddy start
+            
+            echo "Deployment successful"
