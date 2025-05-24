@@ -40,6 +40,8 @@ dependencies {
     runtimeOnly("com.h2database:h2")
     implementation("org.springframework.security:spring-security-core")
     implementation("org.postgresql:postgresql:42.6.0")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus")
 }
 
 tasks.withType<Test> {
