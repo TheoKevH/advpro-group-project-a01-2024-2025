@@ -12,6 +12,6 @@ public class AsyncTransactionLogger {
     // Async programming untuk log setiap perubahan status
     @Async
     public void logTransactionStatus(Transaction trx) {
-        log.info("[LOG] Transaksi ID={} memiliki Status={}", trx.getId(), trx.getStatus());
+        log.info("[LOG] Transaksi ID={} memiliki Status={}", trx.getTransactionId(), trx.getStatus());
     }
 }

@@ -12,7 +12,7 @@ public class InMemoryTransactionRepository implements TransactionRepository {
 
     @Override
     public Transaction save(Transaction transaction) {
-        transactionMap.put(transaction.getId(), transaction);
+        transactionMap.put(transaction.getTransactionId(), transaction);
         return transaction;
     }
 
