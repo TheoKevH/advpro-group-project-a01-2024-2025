@@ -32,17 +32,26 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            set -e
+
             docker rm -f web_server || true
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest
-            
+
             docker run -d \
-            --name=web_server \
-            --restart unless-stopped \
-            -p 8080:8080 \
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest
-            
-            sudo pkill -f caddy || true
-            nohup sudo caddy start > /dev/null 2>&1 &
-            
-            echo "Deployment successful!"
+              --name=web_server \
+              --restart unless-stopped \
+              -p 8080:8080 \
+              ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest
+
+            sudo systemctl restart caddy.service
+
+            sleep 8
+
+            if sudo systemctl is-active --quiet caddy.service; then
+              sudo systemctl status caddy.service --no-pager
+            else
+              sudo systemctl status caddy.service --no-pager || true
+              sudo journalctl -u caddy.service -n 50 --no-pager || true
+              exit 1
+            fi
