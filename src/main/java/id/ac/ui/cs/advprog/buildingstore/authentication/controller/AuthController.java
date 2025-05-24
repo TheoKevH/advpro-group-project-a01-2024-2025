@@ -1,10 +1,11 @@
 package id.ac.ui.cs.advprog.buildingstore.authentication.controller;
 
 import id.ac.ui.cs.advprog.buildingstore.authentication.dto.ChangePasswordRequest;
-import id.ac.ui.cs.advprog.buildingstore.authentication.dto.RegisterRequest;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -42,7 +43,15 @@ public class AuthController {
     }
 
     @PostMapping("/change-password")
-    public String changePassword(@ModelAttribute ChangePasswordRequest request, Principal principal) {
+    public String changePassword(@Valid @ModelAttribute ChangePasswordRequest request,
+                                 BindingResult result,
+                                 Principal principal,
+                                 Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("username", principal.getName());
+            return "profile";
+        }
+
         try {
             authService.changePassword(request, principal.getName());
             return "redirect:/profile?success";
@@ -57,8 +66,4 @@ public class AuthController {
         model.addAttribute("changePasswordRequest", new ChangePasswordRequest());
         return "profile";
     }
-
-
-
-
 }
