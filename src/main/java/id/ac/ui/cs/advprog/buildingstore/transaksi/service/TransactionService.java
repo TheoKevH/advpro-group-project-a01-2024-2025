@@ -1,6 +1,8 @@
 package id.ac.ui.cs.advprog.buildingstore.transaksi.service;
 
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
+import id.ac.ui.cs.advprog.buildingstore.transaksi.model.TransactionItem;
+
 
 import java.util.List;
 

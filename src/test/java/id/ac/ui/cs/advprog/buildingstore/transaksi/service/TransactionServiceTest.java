@@ -2,6 +2,7 @@ package id.ac.ui.cs.advprog.buildingstore.transaksi.service;
 
 import id.ac.ui.cs.advprog.buildingstore.transaksi.enums.TransactionStatus;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
+import id.ac.ui.cs.advprog.buildingstore.transaksi.model.TransactionItem;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.repository.InMemoryTransactionRepository;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.repository.TransactionRepository;
 import org.junit.jupiter.api.Test;
@@ -25,45 +26,76 @@ class TransactionServiceTest {
     TransactionRepository repository;
 
     @Test
-    void testCreateTransaction_shouldInitializeWithInProgressState() {
-        Transaction dummy = new Transaction();
-        when(repository.save(any(Transaction.class))).thenReturn(dummy);
-
-        Transaction transaction = service.createTransaction();
-
-        assertNotNull(transaction.getId());
-        assertEquals("IN_PROGRESS", transaction.getStatus().name());
-    }
-
-    @Test
     void testMoveToPayment_shouldUpdateStateToAwaitingPayment() {
-        Transaction trx = new Transaction();
-        when(repository.findById(trx.getId())).thenReturn(trx);
+        Transaction trx = Transaction.builder()
+                .customerId("cust-1")
+                .items(List.of(new TransactionItem("prod-1", 1)))
+                .build();
+
+        when(repository.findById(trx.getTransactionId())).thenReturn(trx);
         when(repository.save(any(Transaction.class))).thenReturn(trx);
 
-        service.moveToPayment(trx.getId());
+        service.moveToPayment(trx.getTransactionId());
 
         assertEquals("AWAITING_PAYMENT", trx.getStatus().name());
     }
 
     @Test
     void testCreateTransaction_withItems_shouldStoreCorrectly() {
-        TransactionService service = new TransactionServiceImpl(new InMemoryTransactionRepository());
-
         List<TransactionItem> items = List.of(
                 new TransactionItem("prod-12", 2),
                 new TransactionItem("prod-34", 1)
         );
-
         String customerId = "cust-789";
-        Transaction trx = service.createTransaction(customerId, items);
 
-        assertNotNull(trx.getId());
-        assertEquals(customerId, trx.getCustomerId());
-        assertEquals(TransactionStatus.IN_PROGRESS, trx.getStatus());
-        assertEquals(2, trx.getItems().size());
-        assertEquals("prod-12", trx.getItems().get(0).getProductId());
-        assertEquals(2, trx.getItems().get(0).getQuantity());
+        Transaction trx = Transaction.builder()
+                .customerId(customerId)
+                .items(items)
+                .build();
+
+        when(repository.save(any(Transaction.class))).thenReturn(trx);
+
+        Transaction result = service.createTransaction(customerId, items);
+
+        assertNotNull(result.getTransactionId());
+        assertEquals(customerId, result.getCustomerId());
+        assertEquals(TransactionStatus.IN_PROGRESS, result.getStatus());
+        assertEquals(2, result.getItems().size());
+        assertEquals("prod-12", result.getItems().get(0).getProductId());
+        assertEquals(2, result.getItems().get(0).getQuantity());
     }
 
+    @Test
+    void testMarkAsPaid_directlyFromInProgress_shouldThrowException() {
+        Transaction trx = Transaction.builder()
+                .customerId("cust-123")
+                .items(List.of(new TransactionItem("prod-1", 1)))
+                .build();
+
+        when(repository.findById(trx.getTransactionId())).thenReturn(trx);
+
+        assertThrows(IllegalStateException.class, () -> {
+            service.markAsPaid(trx.getTransactionId());
+        });
+    }
+
+    @Test
+    void testCancelAfterCompleted_shouldThrowException() {
+        Transaction trx = Transaction.builder()
+                .customerId("cust-222")
+                .items(List.of(new TransactionItem("prod-9", 1)))
+                .build();
+
+        trx.moveToPayment();
+        trx.markAsPaid();
+
+        when(repository.findById(trx.getTransactionId())).thenReturn(trx);
+
+        assertThrows(IllegalStateException.class, () -> {
+            service.cancelTransaction(trx.getTransactionId());
+        });
+    }
+
+
 }
+

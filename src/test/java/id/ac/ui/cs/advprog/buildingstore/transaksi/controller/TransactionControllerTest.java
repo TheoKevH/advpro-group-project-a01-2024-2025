@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(TransactionController.class)
 @Import(TestSecurityConfig.class)
-class SupplierTransactionControllerTest {
+class TransactionControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

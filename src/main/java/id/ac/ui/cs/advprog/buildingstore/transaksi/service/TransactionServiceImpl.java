@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.buildingstore.transaksi.service;
 
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
+import id.ac.ui.cs.advprog.buildingstore.transaksi.model.TransactionItem;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
