@@ -3,6 +3,7 @@ package id.ac.ui.cs.advprog.buildingstore.authentication.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,6 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig {
 
     @Autowired
@@ -23,7 +25,6 @@ public class WebSecurityConfig {
                         .requestMatchers("/login", "/register", "/css/**", "/js/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/cashier/**").hasRole("CASHIER")
-
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
