@@ -49,6 +49,14 @@ class SupplierControllerTest {
                 .andExpect(model().attribute("suppliers", mockSuppliers));
     }
 
+    @Test
+    @WithMockUser
+    void showAddSupplierForm_shouldReturnFormPageWithEmptyDTO() throws Exception {
+        mockMvc.perform(get("/supplier/add"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/add_supplier"))
+                .andExpect(model().attributeExists("supplierDTO"));
+    }
 
     @Test
     @WithMockUser
@@ -67,6 +75,27 @@ class SupplierControllerTest {
         verify(supplierService).addSupplier(Mockito.any(SupplierDTO.class));
     }
 
+    @Test
+    @WithMockUser
+    void showEditSupplierForm_shouldReturnFormWithSupplierData() throws Exception {
+        Long supplierId = 1L;
+        Supplier supplier = Supplier.builder()
+                .id(supplierId)
+                .name("PT XYZ")
+                .address("Bandung")
+                .contact("0812345678")
+                .category(SupplierCategory.PLUMBING)
+                .build();
+
+        Mockito.when(supplierService.findById(supplierId)).thenReturn(supplier);
+
+        mockMvc.perform(get("/supplier/edit/" + supplierId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/edit_supplier"))
+                .andExpect(model().attributeExists("supplierDTO"))
+                .andExpect(model().attribute("id", supplierId));
+    }
+    
     @Test
     @WithMockUser
     void editSupplier_shouldUpdateAndRedirect() throws Exception {

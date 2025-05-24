@@ -5,26 +5,31 @@ import id.ac.ui.cs.advprog.buildingstore.supplier_management.model.*;
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.repository.PurchaseTransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.scheduling.annotation.Async;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(MockitoExtension.class)
 class PurchaseTransactionServiceTest {
 
     @Mock
     private PurchaseTransactionRepository transactionRepo;
 
-    @InjectMocks
     private PurchaseTransactionServiceImpl service;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        service = new PurchaseTransactionServiceImpl(transactionRepo);
     }
 
     @Test
@@ -36,12 +41,13 @@ class PurchaseTransactionServiceTest {
                 .build();
 
         PurchaseTransactionDTO dto = new PurchaseTransactionDTO(
-                supplier,
-                "Semen Gresik 40kg",
-                120,
-                new BigDecimal("1800000"),
-                LocalDateTime.now()
+                "Semen Gresik 40kg",           // productName
+                120,                           // quantity
+                new BigDecimal("1800000"),     // totalPrice
+                LocalDateTime.now(),           // date
+                supplier                       // supplier → ini harus paling akhir
         );
+
 
         service.addTransaction(dto);
 
@@ -81,6 +87,25 @@ class PurchaseTransactionServiceTest {
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0)).isEqualTo(tx1);
+    }
+
+    @Test
+    void getTransactionsBySupplierAsync_shouldReturnFutureWithResult() throws Exception {
+        Supplier supplier = Supplier.builder().id(1L).name("PT Semen").build();
+        PurchaseTransaction tx = PurchaseTransaction.builder()
+                .supplier(supplier)
+                .productName("Semen A")
+                .quantity(10)
+                .totalPrice(new BigDecimal("1000000"))
+                .date(LocalDateTime.now())
+                .build();
+
+        when(transactionRepo.findBySupplier(supplier)).thenReturn(List.of(tx));
+
+        var future = service.getTransactionsBySupplierAsync(supplier);
+
+        assertThat(future).isNotNull();
+        assertThat(future.get()).containsExactly(tx);
     }
 
 }

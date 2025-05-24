@@ -13,8 +13,11 @@ import org.springframework.ui.Model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.*;
 
 class SupplierTransactionControllerTest {
@@ -64,6 +67,49 @@ class SupplierTransactionControllerTest {
         verify(model).addAttribute("transactions", transactions);
         assertThat(result).isEqualTo("admin/supplier_transactions");
     }
+
+    @Test
+    void showSupplierTransactions_shouldThrowRuntimeException_whenAsyncFails() throws Exception {
+        Long supplierId = 1L;
+        Supplier supplier = Supplier.builder()
+                .id(supplierId)
+                .name("PT Error")
+                .build();
+
+        when(supplierService.findById(supplierId)).thenReturn(supplier);
+        CompletableFuture<List<PurchaseTransaction>> failingFuture = new CompletableFuture<>();
+        failingFuture.completeExceptionally(new ExecutionException("Async failed", new Throwable()));
+
+        when(transactionService.getTransactionsBySupplierAsync(supplier)).thenReturn(failingFuture);
+
+        Throwable thrown = catchThrowable(() -> {
+            controller.showSupplierTransactions(supplierId, model);
+        });
+
+        assertThat(thrown)
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Gagal mengambil data transaksi supplier");
+    }
+
+
+    @Test
+    void showAddTransactionForm_shouldAddAttributesAndReturnView() {
+        Long supplierId = 1L;
+        Supplier supplier = Supplier.builder()
+                .id(supplierId)
+                .name("PT Tambah")
+                .category(SupplierCategory.PLUMBING)
+                .build();
+
+        when(supplierService.findById(supplierId)).thenReturn(supplier);
+
+        String result = controller.showAddTransactionForm(supplierId, model);
+
+        verify(model).addAttribute(eq("supplier"), eq(supplier));
+        verify(model).addAttribute(eq("transactionDTO"), any(PurchaseTransactionDTO.class));
+        assertThat(result).isEqualTo("admin/add_transaction");
+    }
+
 
     @Test
     void addTransaction_shouldCallServiceAndRedirectToTransactionList() {

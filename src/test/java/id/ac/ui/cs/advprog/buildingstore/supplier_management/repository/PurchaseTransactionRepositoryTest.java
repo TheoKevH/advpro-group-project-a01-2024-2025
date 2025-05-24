@@ -16,12 +16,19 @@ class PurchaseTransactionRepositoryTest {
     @Autowired
     private PurchaseTransactionRepository transactionRepository;
 
+    @Autowired
+    private SupplierRepository supplierRepository;
+
     @Test
     void canSaveAndFindTransaction() {
         Supplier supplier = Supplier.builder()
                 .name("PT Baja Besi")
+                .address("Jl. Industri No. 99")
+                .contact("08123456789")
                 .category(SupplierCategory.BESI_BAJA)
                 .build();
+
+        supplier = supplierRepository.save(supplier);
 
         PurchaseTransaction tx = PurchaseTransaction.builder()
                 .supplier(supplier)
