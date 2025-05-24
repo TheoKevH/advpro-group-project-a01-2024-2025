@@ -43,4 +43,5 @@ jobs:
             -e ENV1="insert env var anda disini jika perlu" \
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO_NAME }}:latest
             
-            sudo systemctl restart caddy || (sudo caddy stop && sudo caddy start)
+            sudo caddy stop
+            sudo caddy start
