@@ -18,8 +18,10 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     @Override
-    public Transaction createTransaction() {
+    public Transaction createTransaction(String customerId, List<TransactionItem> items) {
         Transaction transaction = new Transaction();
+        transaction.setCustomerId(customerId);
+        transaction.setItems(items);
         return repository.save(transaction);
     }
 
