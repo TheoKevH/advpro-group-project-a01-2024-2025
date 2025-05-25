@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>My Transactions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+
+<!-- Sidebar -->
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<!-- Main Content -->
+<main class="flex-1 p-10 max-w-screen-xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-gray-900">My Transactions</h1>
+
+    <div class="bg-white rounded-xl shadow p-6 overflow-x-auto">
+        <div class="mb-4 flex justify-end">
+            <a href="/transaksi/new"
+               class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition">
+                + Add Transaction
+            </a>
+        </div>
+        <table class="min-w-full text-sm text-left text-gray-700">
+            <thead class="border-b font-medium text-gray-500">
+            <tr>
+                <th class="px-4 py-2">Transaction ID</th>
+                <th class="px-4 py-2">Customer ID</th>
+                <th class="px-4 py-2">Status</th>
+                <th class="px-4 py-2">Total Items</th>
+                <th class="px-4 py-2">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="trx : ${transactions}" class="border-t hover:bg-gray-50">
+                <td class="px-4 py-2" th:text="${trx.transactionId}">TRX-001</td>
+                <td class="px-4 py-2" th:text="${trx.customerId}">CUST-123</td>
+                <td class="px-4 py-2 font-semibold" th:text="${trx.status}">IN_PROGRESS</td>
+                <td class="px-4 py-2" th:text="${#lists.size(trx.items)}">3</td>
+                <td class="px-4 py-2 space-x-2">
+                    <a th:if="${trx.status.name() == 'AWAITING_PAYMENT'}"
+                       th:href="@{'/transaksi/' + ${trx.transactionId} + '/pay'}"
+                       class="text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-md text-sm font-medium">
+                        Pay
+                    </a>
+                    <a th:href="@{'/transaksi/' + ${trx.transactionId}}"
+                       class="text-blue-500 hover:underline text-sm">
+                        View
+                    </a>
+                </td>
+
+            </tr>
+            <tr th:if="${#lists.isEmpty(transactions)}">
+                <td colspan="5" class="text-center py-10 text-gray-500">No transactions found.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

@@ -1,8 +1,11 @@
 package id.ac.ui.cs.advprog.buildingstore.transaksi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
+import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepository;
 import id.ac.ui.cs.advprog.buildingstore.config.TestSecurityConfig;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CreateTransactionRequest;
+import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.UpdateTransactionRequest;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.TransactionItem;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.service.TransactionService;
@@ -13,13 +16,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -32,6 +38,9 @@ class TransactionControllerTest {
 
     @MockBean
     private TransactionService service;
+
+    @MockBean
+    private UserRepository userRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -116,5 +125,100 @@ class TransactionControllerTest {
         mockMvc.perform(delete("/api/transactions/" + dummyId)
                         .with(csrf()))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void testUpdateTransaction_shouldReplaceItems() throws Exception {
+        List<TransactionItem> updatedItems = List.of(
+                new TransactionItem("prod-1", 5),
+                new TransactionItem("prod-2", 3)
+        );
+
+        UpdateTransactionRequest updateRequest = new UpdateTransactionRequest();
+        updateRequest.setItems(updatedItems);
+
+        dummy.setItems(updatedItems);
+        when(service.updateTransaction(dummyId, updatedItems)).thenReturn(dummy);
+
+        mockMvc.perform(put("/api/transactions/" + dummyId)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items.length()").value(2))
+                .andExpect(jsonPath("$.items[0].productId").value("prod-1"))
+                .andExpect(jsonPath("$.items[0].quantity").value(5))
+                .andExpect(jsonPath("$.items[1].productId").value("prod-2"))
+                .andExpect(jsonPath("$.items[1].quantity").value(3));
+    }
+
+    @Test
+    void testGetTransactionsByCustomer_shouldReturnFilteredTransactions() throws Exception {
+        Transaction trx1 = Transaction.builder()
+                .transactionId("trx-1")
+                .customerId("cust-321")
+                .build();
+
+        Transaction trx2 = Transaction.builder()
+                .transactionId("trx-2")
+                .customerId("cust-321")
+                .build();
+
+        when(service.getTransactionsByCustomer("cust-321")).thenReturn(List.of(trx1, trx2));
+
+        mockMvc.perform(get("/api/transactions/customer/cust-321"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2));
+    }
+
+    @Test
+    @WithMockUser(username = "kasir01", roles = {"KASIR"})
+    void testGetMyTransactions_shouldReturnOnlyUserTransactions() throws Exception {
+        String username = "kasir01";
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername(username);
+
+        Transaction trx1 = Transaction.builder()
+                .transactionId("trx-1")
+                .customerId("cust-A")
+                .createdBy(user)
+                .build();
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+        when(service.getTransactionsByUser(user)).thenReturn(List.of(trx1));
+
+        mockMvc.perform(get("/api/transactions/my-transactions")
+                        .with(csrf())
+                        .with(user(username).roles("KASIR")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].transactionId").value("trx-1"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin01", roles = {"ADMIN"})
+    void testGetTransactionsByCreator_shouldReturnFilteredList() throws Exception {
+        String kasirUsername = "kasir02";
+
+        User kasir = new User();
+        kasir.setId(2L);
+        kasir.setUsername(kasirUsername);
+
+        Transaction trx1 = Transaction.builder()
+                .transactionId("trx-18")
+                .customerId("cust-X")
+                .createdBy(kasir)
+                .build();
+
+        when(userRepository.findByUsername(kasirUsername)).thenReturn(Optional.of(kasir));
+        when(service.getTransactionsByUser(kasir)).thenReturn(List.of(trx1));
+
+        mockMvc.perform(get("/api/transactions/created-by/" + kasirUsername)
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].transactionId").value("trx-18"));
     }
 }

@@ -1,16 +1,25 @@
 package id.ac.ui.cs.advprog.buildingstore.transaksi.service;
 
+import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
+import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepository;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.enums.TransactionStatus;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.TransactionItem;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.repository.InMemoryTransactionRepository;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.repository.TransactionRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,6 +33,10 @@ class TransactionServiceTest {
 
     @MockBean
     TransactionRepository repository;
+
+    @MockBean
+    UserRepository userRepository;
+
 
     @Test
     void testMoveToPayment_shouldUpdateStateToAwaitingPayment() {
@@ -42,6 +55,15 @@ class TransactionServiceTest {
 
     @Test
     void testCreateTransaction_withItems_shouldStoreCorrectly() {
+        String username = "kasir01";
+        Authentication auth = new UsernamePasswordAuthenticationToken(username, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername(username);
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
         List<TransactionItem> items = List.of(
                 new TransactionItem("prod-12", 2),
                 new TransactionItem("prod-34", 1)
@@ -96,6 +118,92 @@ class TransactionServiceTest {
         });
     }
 
+    @Test
+    void testUpdateTransaction_shouldReplaceItems() {
+        String id = UUID.randomUUID().toString();
+        Transaction trx = Transaction.builder()
+                .transactionId(id)
+                .customerId("cust-1")
+                .items(List.of(new TransactionItem("prod-1", 2)))
+                .build();
 
+        List<TransactionItem> updatedItems = List.of(
+                new TransactionItem("prod-1", 5),
+                new TransactionItem("prod-2", 3)
+        );
+
+        when(repository.findById(id)).thenReturn(trx);
+        when(repository.save(any(Transaction.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Transaction result = service.updateTransaction(id, updatedItems);
+
+        assertEquals(2, result.getItems().size());
+        assertEquals("prod-2", result.getItems().get(1).getProductId());
+        assertEquals(3, result.getItems().get(1).getQuantity());
+    }
+
+    @Test
+    void testGetTransactionsByCustomer_shouldReturnOnlyMatchingTransactions() {
+        Transaction trx1 = Transaction.builder()
+                .transactionId("trx-1")
+                .customerId("cust-123")
+                .build();
+
+        Transaction trx2 = Transaction.builder()
+                .transactionId("trx-2")
+                .customerId("cust-999")
+                .build();
+
+        when(repository.findAll()).thenReturn(List.of(trx1, trx2));
+
+        List<Transaction> result = service.getTransactionsByCustomer("cust-123");
+
+        assertEquals(1, result.size());
+        assertEquals("trx-1", result.get(0).getTransactionId());
+    }
+
+    @Test
+    void testCreateTransaction_shouldStoreCreatedByUser() {
+        String username = "kasir01";
+        Authentication auth = new UsernamePasswordAuthenticationToken(username, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername(username);
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+        when(repository.save(any(Transaction.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Transaction result = service.createTransaction("cust-123", List.of(new TransactionItem("prod-1", 1)));
+
+        assertNotNull(result.getCreatedBy());
+        assertEquals("kasir01", result.getCreatedBy().getUsername());
+    }
+
+    @Test
+    void testGetTransactionsByUser_shouldReturnOnlyTheirOwn() {
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("kasir01");
+
+        User other = new User();
+        other.setId(2L);
+
+        Transaction t1 = Transaction.builder().transactionId("trx-1").createdBy(user).build();
+        Transaction t2 = Transaction.builder().transactionId("trx-2").createdBy(other).build();
+
+        when(repository.findAll()).thenReturn(List.of(t1, t2));
+
+        List<Transaction> result = service.getTransactionsByUser(user);
+
+        assertEquals(1, result.size());
+        assertEquals("trx-1", result.get(0).getTransactionId());
+    }
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 }
 
