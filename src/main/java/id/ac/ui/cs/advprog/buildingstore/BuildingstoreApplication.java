@@ -15,8 +15,4 @@ public class BuildingstoreApplication {
         SpringApplication.run(BuildingstoreApplication.class, args);
     }
 
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
 }
