@@ -1,7 +1,6 @@
 package id.ac.ui.cs.advprog.buildingstore.supplier_management.service;
 
 import id.ac.ui.cs.advprog.buildingstore.product.dto.ProductRequestDTO;
-import id.ac.ui.cs.advprog.buildingstore.product.service.ProductService;
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.dto.PurchaseTransactionDTO;
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.model.PurchaseTransaction;
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.factory.PurchaseTransactionFactory;
