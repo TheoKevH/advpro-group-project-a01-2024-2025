@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -34,6 +35,7 @@ public class ProductRestController {
     @GetMapping
     public List<ProductDTO> getAllProducts() {
         return service.findAll().stream()
+                .filter(product -> product.getProductPrice() != null && product.getProductPrice().compareTo(BigDecimal.ZERO) > 0)
                 .map(ProductFactory::toDTO)
                 .toList();
     }
@@ -47,10 +49,11 @@ public class ProductRestController {
 
     // Update product by ID (PUT /api/products/{id})
     @PutMapping("/{id}")
-    public ProductDTO updateProduct(@PathVariable String id, @RequestBody ProductDTO dto) {
-        dto.setProductId(id); // set ID agar konsisten
-        Product updated = service.edit(dto);
-        return ProductFactory.toDTO(updated);
+    public ProductDTO updateProductQuantity(@PathVariable String id, @RequestBody Integer quantity) {
+        Product existingProduct = service.findById(id);
+        existingProduct.setProductQuantity(quantity);
+        Product updatedProduct = service.edit(ProductFactory.toDTO(existingProduct));
+        return ProductFactory.toDTO(updatedProduct);
     }
 
     // Delete product by ID (DELETE /api/products/{id})

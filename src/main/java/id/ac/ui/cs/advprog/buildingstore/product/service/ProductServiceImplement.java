@@ -26,7 +26,6 @@ public class ProductServiceImplement implements ProductService {
     public Product create(ProductDTO dto) {
         Product product = ProductFactory.fromDTO(dto);
 
-        // Cek apakah nama produk sudah ada
         if (productRepository.findByProductNameIgnoreCase(product.getProductName()).isPresent()) {
             throw new IllegalArgumentException("Produk dengan nama ini sudah ada");
         }
@@ -84,4 +83,5 @@ public class ProductServiceImplement implements ProductService {
                     return productRepository.save(newProduct);
                 });
     }
+
 }
