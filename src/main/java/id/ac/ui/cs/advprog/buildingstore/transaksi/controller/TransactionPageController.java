@@ -20,14 +20,21 @@ public class TransactionPageController {
     private final TransactionService transactionService;
     private final UserRepository userRepository;
 
-    @GetMapping("/cashier/transactions")
+    @GetMapping("/transaksi")
     public String cashierTransactions(Model model) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        List<Transaction> transactions = transactionService.getTransactionsByUser(user);
+        List<Transaction> transactions;
+        if (user.getRole().name().equals("ADMIN")) {
+            transactions = transactionService.getAllTransactions();
+        } else {
+            transactions = transactionService.getTransactionsByUser(user);
+        }
+
         model.addAttribute("transactions", transactions);
+        model.addAttribute("username", user.getUsername());
 
         return "transaksi/listTransaksi";
     }
