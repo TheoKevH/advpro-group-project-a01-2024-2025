@@ -160,6 +160,24 @@ class TransactionServiceTest {
         assertEquals("kasir01", result.getCreatedBy().getUsername());
     }
 
+    @Test
+    void testGetTransactionsByUser_shouldReturnOnlyTheirOwn() {
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("kasir01");
+
+        Transaction t1 = Transaction.builder().transactionId("trx-1").createdBy(user).build();
+        Transaction t2 = Transaction.builder().transactionId("trx-2").createdBy(new User()).build();
+
+        when(repository.findAll()).thenReturn(List.of(t1, t2));
+
+        List<Transaction> result = service.getTransactionsByUser(user);
+
+        assertEquals(1, result.size());
+        assertEquals("trx-1", result.get(0).getTransactionId());
+    }
+
+
 
 
 
