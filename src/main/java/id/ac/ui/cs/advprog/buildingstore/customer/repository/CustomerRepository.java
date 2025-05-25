@@ -12,9 +12,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Repository
 public class CustomerRepository {
     // Mapping of Customer based id
-    private Map<Long, Customer> customerMap = new ConcurrentHashMap<>();
+    private Map<String, Customer> customerMap = new ConcurrentHashMap<>();
     // Mapping of Customer based user
-    private Map<User, Customer> userMap = new ConcurrentHashMap<>();
+    private Map<Long, Customer> userMap = new ConcurrentHashMap<>();
 
     public Customer createCustomer(Customer customer) {
         if (customerMap.containsKey(customer.getId())) {
@@ -22,6 +22,8 @@ public class CustomerRepository {
         }
 
         customerMap.put(customer.getId(), customer);
+        userMap.put(customer.getUser().getId(), customer);
+        System.out.println("Customer created: " + customer.getId());
         return customer;
     }
 
@@ -31,28 +33,31 @@ public class CustomerRepository {
 
     public Customer getCustomer(String id) {
         if (customerMap.containsKey(id)) {
+            System.out.println("Customer found: " + id);
             return customerMap.get(id);
         }
+        System.out.println("Customer not found: " + id);
         return null;
     }
 
-    public Customer getCustomerByUserId(Long userId) {
-        Iterator<Customer> customers = getAllCustomers();
-        while (customers.hasNext()) {
-            Customer customer = customers.next();
-            if (Objects.equals(customer.getUser().getId(), userId)) {
-                return customer;
-            }
+    public Customer getCustomerByUser(User user) {
+        if (userMap.containsKey(user.getId())) {
+            System.out.println("Customer found by user: " + user.getId());
+            return userMap.get(user.getId());
         }
+        System.out.println("Customer not found by user: " + user.getId());
         return null;
     }
 
     public Customer updateCustomer(Customer customer) {
         customerMap.put(customer.getId(), customer);
+        userMap.put(customer.getUser().getId(), customer);
         return customer;
     }
 
     public void removeCustomer(String customerId) {
+        Customer customer = customerMap.get(customerId);
         customerMap.remove(customerId);
+        userMap.remove(customer.getUser().getId());
     }
 }

@@ -4,6 +4,7 @@ import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.util.UUID;
 
@@ -12,8 +13,8 @@ import java.util.UUID;
 @Getter @Setter
 public class Customer {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id", unique = true, nullable = false, updatable = false)
+    private String id = UUID.randomUUID().toString();
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private User user;
@@ -23,4 +24,10 @@ public class Customer {
 
     @Column(unique = true)
     private String phone;
+
+    public Customer() {}
+
+    public Customer(User user) {
+        this.user = user;
+    }
 }

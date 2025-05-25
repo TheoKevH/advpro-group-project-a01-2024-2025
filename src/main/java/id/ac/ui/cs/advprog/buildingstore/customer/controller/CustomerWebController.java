@@ -2,11 +2,10 @@ package id.ac.ui.cs.advprog.buildingstore.customer.controller;
 
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.Role;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
+import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
 import id.ac.ui.cs.advprog.buildingstore.customer.model.Customer;
 import id.ac.ui.cs.advprog.buildingstore.customer.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,25 +18,27 @@ import java.util.List;
 public class CustomerWebController {
     @Autowired
     private CustomerService customerService;
+    @Autowired
+    private AuthService authService;
 
-    @GetMapping("/register")
-    public String registerCustomerPage(Model model) {
-        Customer customer = new Customer();
+    @GetMapping("/create")
+    public String createCustomerPage(Authentication authentication, Model model) {
+        String username = authentication.getName();
+        User user = authService.getUser(username);
+        Customer customer = new Customer(user);
+
         model.addAttribute("customer", customer);
-        return "customer/registerCustomer";
+        return "customer/createCustomer";
     }
 
-    @PostMapping("/register")
-    public String registerCustomerPost(@ModelAttribute Customer customer, Model model) {
+    @PostMapping("/create")
+    public String createCustomerPost(@ModelAttribute Customer customer, Model model) {
+        String username = customer.getUser().getUsername();
+        User user = authService.getUser(username);
+        customer.setUser(user);
+
         customerService.addCustomer(customer);
-        return "redirect:list";
-    }
-
-    @GetMapping("/")
-    public String listCustomers(Model model) {
-        List<Customer> customers = customerService.getAllCustomers();
-        model.addAttribute("customers", customers);
-        return "customer/listCustomer";
+        return "redirect:/customers";
     }
 
     @GetMapping("")
@@ -46,21 +47,22 @@ public class CustomerWebController {
             return "redirect:/login";
         }
 
-        User user = (User) authentication.getPrincipal();
+        String username = authentication.getName();
+        User user = authService.getUser(username);
+        model.addAttribute("user", user);
+
         if (user.getRole() == Role.ADMIN) {
             // Admin view - get all customers
             List<Customer> customers = customerService.getAllCustomers();
             model.addAttribute("customers", customers);
             model.addAttribute("isAdmin", true);
+            model.addAttribute("hasCustomerAccount", false);
         } else {
             // Regular user view
-            Customer customer = customerService.getCustomerByUserId(user.getId());
-            if (customer != null) {
-                model.addAttribute("customer", customer);
-                model.addAttribute("hasCustomerAccount", true);
-            } else {
-                model.addAttribute("hasCustomerAccount", false);
-            }
+            Customer customer = customerService.getCustomerByUser(user);
+            model.addAttribute("customer", customer);
+            model.addAttribute("isAdmin", false);
+            model.addAttribute("hasCustomerAccount", customer != null);
         }
 
         List<Customer> customers = customerService.getAllCustomers();
@@ -68,22 +70,32 @@ public class CustomerWebController {
         return "customer/customerHomepage";
     }
 
-    @GetMapping("/edit/{id}")
-    public String editCustomerPage(@PathVariable String id, Model model) {
-        Customer customer = customerService.getCustomer(id);
+    @GetMapping("/edit")
+    public String editCustomerPage(Authentication authentication, Model model) {
+        String username = authentication.getName();
+        User user = authService.getUser(username);
+        Customer customer = customerService.getCustomerByUser(user);
+
         model.addAttribute("customer", customer);
         return "customer/editCustomer";
     }
 
     @PostMapping("/edit")
-    public String editCustomerPost(@ModelAttribute Customer customer, Model model) {
-        customerService.addCustomer(customer);
-        return "redirect:list";
+    public String editCustomerPost(@ModelAttribute Customer customer, Authentication authentication, Model model) {
+        String username = customer.getUser().getUsername();
+        User user = authService.getUser(username);
+        customer.setUser(user);
+
+        customerService.updateCustomer(customer);
+        return "redirect:/customers";
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteCustomerForm(@PathVariable String id, Model model) {
-        customerService.deleteCustomer(id);
-        return "redirect:list";
+    @PostMapping("/delete")
+    public String deleteCustomerForm(Authentication authentication, Model model) {
+        String username = authentication.getName();
+        User user = authService.getUser(username);
+        Customer customer = customerService.getCustomerByUser(user);
+        customerService.deleteCustomer(customer.getId());
+        return "redirect:/customers";
     }
 }

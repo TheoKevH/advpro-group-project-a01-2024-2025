@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.buildingstore.customer.service;
 
+import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.customer.model.Customer;
 
 import java.util.Iterator;
@@ -9,7 +10,7 @@ public interface CustomerService {
     public Customer addCustomer(Customer customer);
     public List<Customer> getAllCustomers();
     public Customer getCustomer(String id);
-    public Customer getCustomerByUserId(Long userId);
+    public Customer getCustomerByUser(User user);
     public Customer updateCustomer(Customer customer);
     public void deleteCustomer(String id);
 }
