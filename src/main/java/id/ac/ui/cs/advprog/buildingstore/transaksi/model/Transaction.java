@@ -1,6 +1,9 @@
 package id.ac.ui.cs.advprog.buildingstore.transaksi.model;
 
+import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.enums.TransactionStatus;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -18,6 +21,11 @@ public class Transaction {
     private String transactionId = UUID.randomUUID().toString();
 
     private String customerId;
+
+    @ManyToOne
+    @JoinColumn(name = "created_by_id")
+    private User createdBy;
+
 
     @Builder.Default
     private List<TransactionItem> items = new ArrayList<>();
