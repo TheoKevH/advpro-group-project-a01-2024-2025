@@ -3,38 +3,77 @@ package id.ac.ui.cs.advprog.buildingstore.customer.controller;
 import id.ac.ui.cs.advprog.buildingstore.customer.model.Customer;
 import id.ac.ui.cs.advprog.buildingstore.customer.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
-@RequestMapping("/customer")
+@RestController
+@RequestMapping("/api/customers")
+@CrossOrigin(origins = "*")
 public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
-    @GetMapping("/register")
-    public String registerCustomerPage(Model model) {
-        Customer customer = new Customer();
-        model.addAttribute("customer", customer);
-        return "customer/registerCustomer";
+    @GetMapping
+    public ResponseEntity<List<Customer>> getAllCustomers() {
+        try {
+            List<Customer> customers = customerService.getAllCustomers();
+
+            if (customers.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+
+            return ResponseEntity.ok(customers);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
-    @PostMapping("/register")
-    public String registerCustomerPost(@ModelAttribute Customer customer, Model model) {
-        customerService.addCustomer(customer);
-        return "redirect:list";
+    // GET /api/customers/{id} - Returns JSON of single customer
+    @GetMapping("/{id}")
+    public ResponseEntity<Customer> getCustomerById(@PathVariable String id) {
+        Customer customer = customerService.getCustomer(id);
+
+        if (customer != null) {
+            return ResponseEntity.ok(customer);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    @GetMapping("/list")
-    public String listCustomers(Model model) {
-        List<Customer> customers = customerService.getAllCustomers();
-        model.addAttribute("customers", customers);
-        return "customer/listCustomers";
+    // POST /api/customers - Creates new customer, returns JSON
+    @PostMapping
+    public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
+        try {
+            Customer savedCustomer = customerService.addCustomer(customer);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedCustomer);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    // PUT /api/customers/{id} - Updates customer, returns JSON
+    @PutMapping("/{id}")
+    public ResponseEntity<Customer> updateCustomer(@PathVariable String id, @RequestBody Customer customer) {
+        try {
+            customer.setId(id);
+            Customer updatedCustomer = customerService.updateCustomer(customer);
+            return ResponseEntity.ok(updatedCustomer);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    // DELETE /api/customers/{id} - Deletes customer
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCustomer(@PathVariable String id) {
+        try {
+            customerService.deleteCustomer(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

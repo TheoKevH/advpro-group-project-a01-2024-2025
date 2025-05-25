@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+
+<!-- Sidebar -->
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<main class="flex-1 p-10 max-w-screen-xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-gray-900">Customer Account</h1>
+
+    <!-- Admin View -->
+    <div th:if="${isAdmin}">
+        <div class="min-h-screen">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="bg-white rounded-lg shadow-md">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 bg-blue-600 rounded"></div>
+                                <div>
+                                    <h1 class="text-2xl font-bold text-gray-900">Customer Management</h1>
+                                    <p class="text-sm text-gray-600">
+                                        Logged in as Admin: <span th:text="${user.username}" class="font-medium"></span>
+                                    </p>
+                                </div>
+                            </div>
+                            <a href="/admin/customer/create" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200 flex items-center gap-2">
+                                <span class="text-sm">+</span>
+                                Add Customer
+                            </a>
+                        </div>
+                        <p class="text-gray-600 mt-2">
+                            Manage all customer accounts
+                            <span th:if="${customers}" class="font-medium">
+                                    (Total: <span th:text="${#lists.size(customers)}">0</span> customers)
+                            </span>
+                        </p>
+                    </div>
+
+                    <!-- Empty state when no customers -->
+                    <div th:if="${customers == null or #lists.isEmpty(customers)}" class="p-12 text-center">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <div class="w-8 h-8 bg-gray-400 rounded"></div>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Customers Found</h3>
+                        <p class="text-gray-600 mb-4">There are no customer accounts in the system yet.</p>
+                        <a href="/admin/customer/create" class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200">
+                            <span class="text-sm">+</span>
+                            Create First Customer
+                        </a>
+                    </div>
+
+                    <!-- Customers table -->
+                    <div th:if="${customers != null and !#lists.isEmpty(customers)}" class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Customer
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Contact Information
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Account Statistics
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tr th:each="customerItem : ${customers}" class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                            <div class="w-5 h-5 bg-blue-600 rounded"></div>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900" th:text="${customerItem.email}">Customer Email</div>
+                                            <div class="text-sm text-gray-500" th:text="'ID: ' + ${customerItem.id}">ID: 1</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900" th:text="${customerItem.email}">email@example.com</div>
+                                    <div class="text-sm text-gray-500" th:if="${customerItem.phone}" th:text="${customerItem.phone}">Phone</div>
+                                    <div class="text-xs text-gray-400" th:if="${customerItem.phone.isEmpty()}">No phone number</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900">Customer ID: <span th:text="${customerItem.id}">1</span></div>
+                                    <div class="text-sm text-gray-500">Registered User</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex gap-2">
+                                        <a th:href="@{/admin/customer/edit/{id}(id=${customerItem.id})}"
+                                           class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition duration-200 flex items-center gap-1"
+                                           title="Edit Customer">
+                                            <span class="text-xs">✏</span>
+                                            Edit
+                                        </a>
+                                        <a th:href="@{/admin/customer/view/{id}(id=${customerItem.id})}"
+                                           class="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 transition duration-200 flex items-center gap-1"
+                                           title="View Customer Details">
+                                            <span class="text-xs">👁</span>
+                                            View
+                                        </a>
+                                        <form th:action="@{/admin/customer/delete/{id}(id=${customerItem.id})}" method="post" style="display: inline;"
+                                              th:onsubmit="'return confirm(\'Are you sure you want to delete customer ' + ${customerItem.email} + '? This action cannot be undone.\')'">
+                                            <input type="hidden" name="_method" value="delete">
+                                            <input type="hidden" name="_token" th:value="${_csrf.token}"/>
+                                            <button type="submit"
+                                                    class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition duration-200 flex items-center gap-1"
+                                                    title="Delete Customer">
+                                                <span class="text-xs">🗑</span>
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- No Customer Account View (Regular User) -->
+    <div th:if="${customer == null and !isAdmin}">
+        <div class="min-h-screen">
+            <div class="max-w-md mx-auto text-center">
+                <div class="bg-white rounded-lg shadow-md p-8">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <div class="w-8 h-8 bg-blue-600 rounded"></div>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Create Customer Account</h2>
+                    <p class="text-gray-600 mb-6">
+                        Welcome <span th:text="${user.username}" class="font-semibold">User</span>!
+                        You don't have a customer account yet. Create one to start making purchases, track your orders, and manage your profile.
+                    </p>
+                    <div class="mb-6 text-sm text-gray-500">
+                        <p>Logged in as: <span th:text="${user.username}" class="font-medium"></span></p>
+                    </div>
+                    <a href="/customers/create" class="w-full inline-block bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-200 text-center">
+                        <span class="mr-2">+</span>
+                        Create Customer Account
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Customer Account View -->
+    <div th:if="${customer != null and !isAdmin}">
+        <div class="min-h-screen">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="bg-white rounded-lg shadow-md">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-900">My Customer Account</h1>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    Logged in as: <span th:text="${user.username}" class="font-medium"></span>
+                                </p>
+                            </div>
+                            <div class="flex gap-2">
+                                <a th:href="@{/customers/edit}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center gap-2">
+                                    Edit
+                                </a>
+                                <form th:action="@{/customers/delete}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete your customer account? This action cannot be undone.')">
+                                    <input type="hidden" name="_method" value="delete">
+                                    <input type="hidden" name="_token" th:value="${_csrf.token}"/>
+                                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200 flex items-center gap-2">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
+                            <div class="space-y-4">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="text-sm text-gray-600">Customer ID</div>
+                                    <div class="text-lg font-semibold text-red-900" th:text="${customer.id}">
+                                        1
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="text-sm text-gray-600">Username</div>
+                                    <div class="text-lg font-semibold text-gray-900" th:text="${user.username}">
+                                        username
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="text-sm text-gray-600">Email</div>
+                                    <div class="text-lg font-semibold text-gray-900" th:text="${customer.email}">
+                                        email
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="text-sm text-gray-600">Username</div>
+                                    <div th:if="${!customer.phone.isEmpty()}">
+                                        <span class="text-lg font-semibold text-gray-900" th:text="${customer.phone}">phone</span>
+                                    </div>
+                                    <div class="text-lg font-semibold text-gray-900" th:if="${customer.phone.isEmpty()}">
+                                        phone
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Add confirmation for delete actions
+    document.querySelectorAll('form[onsubmit*="confirm"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const customerEmail = this.getAttribute('data-customer-email') || 'this customer';
+            if (!confirm(`Are you sure you want to delete ${customerEmail}? This action cannot be undone.`)) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+</body>
+</html>

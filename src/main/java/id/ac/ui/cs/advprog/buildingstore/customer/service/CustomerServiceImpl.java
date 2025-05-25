@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.buildingstore.customer.service;
 
+import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.customer.model.Customer;
 import id.ac.ui.cs.advprog.buildingstore.customer.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Customer addCustomer(Customer customer) {
-        customerRepository.addCustomer(customer);
+        customerRepository.createCustomer(customer);
         return customer;
     }
 
@@ -27,5 +28,25 @@ public class CustomerServiceImpl implements CustomerService {
         List<Customer> allCustomer = new ArrayList<>();
         customerIterator.forEachRemaining(allCustomer::add);
         return allCustomer;
+    }
+
+    @Override
+    public Customer getCustomer(String id) {
+        return customerRepository.getCustomer(id);
+    }
+
+    @Override
+    public Customer getCustomerByUser(User user) {
+        return customerRepository.getCustomerByUser(user);
+    }
+
+    @Override
+    public Customer updateCustomer(Customer customer) {
+        return customerRepository.updateCustomer(customer);
+    }
+
+    @Override
+    public void deleteCustomer(String id) {
+        customerRepository.removeCustomer(id);
     }
 }
