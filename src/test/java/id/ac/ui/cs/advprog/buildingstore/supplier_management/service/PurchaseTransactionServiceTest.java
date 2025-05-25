@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,12 +25,15 @@ class PurchaseTransactionServiceTest {
     @Mock
     private PurchaseTransactionRepository transactionRepo;
 
+    @Mock
+    private RestTemplate restTemplate;
+
     private PurchaseTransactionServiceImpl service;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        service = new PurchaseTransactionServiceImpl(transactionRepo);
+        service = new PurchaseTransactionServiceImpl(transactionRepo, restTemplate);
     }
 
     @Test
