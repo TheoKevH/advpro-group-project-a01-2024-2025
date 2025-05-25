@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -95,6 +96,31 @@ class TransactionServiceTest {
             service.cancelTransaction(trx.getTransactionId());
         });
     }
+
+    @Test
+    void testUpdateTransaction_shouldReplaceItems() {
+        String id = UUID.randomUUID().toString();
+        Transaction trx = Transaction.builder()
+                .transactionId(id)
+                .customerId("cust-1")
+                .items(List.of(new TransactionItem("prod-1", 2)))
+                .build();
+
+        List<TransactionItem> updatedItems = List.of(
+                new TransactionItem("prod-1", 5),
+                new TransactionItem("prod-2", 3)
+        );
+
+        when(repository.findById(id)).thenReturn(trx);
+        when(repository.save(any(Transaction.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Transaction result = service.updateTransaction(id, updatedItems);
+
+        assertEquals(2, result.getItems().size());
+        assertEquals("prod-2", result.getItems().get(1).getProductId());
+        assertEquals(3, result.getItems().get(1).getQuantity());
+    }
+
 
 
 }
