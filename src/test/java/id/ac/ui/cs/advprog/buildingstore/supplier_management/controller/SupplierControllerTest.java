@@ -19,10 +19,9 @@ import java.util.List;
 
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(SupplierController.class)
 class SupplierControllerTest {
@@ -35,7 +34,7 @@ class SupplierControllerTest {
 
     @Test
     @WithMockUser
-    void getAllSuppliers_shouldReturnListAsJson() throws Exception {
+    void showSupplierList_shouldAddSuppliersToModelAndReturnView() throws Exception {
         List<Supplier> mockSuppliers = List.of(
                 Supplier.builder().id(1L).name("Supplier A").build(),
                 Supplier.builder().id(2L).name("Supplier B").build()
@@ -43,11 +42,20 @@ class SupplierControllerTest {
 
         Mockito.when(supplierService.getAllSuppliers()).thenReturn(mockSuppliers);
 
-        mockMvc.perform(get("/supplier/list"))
+        mockMvc.perform(get("/supplier"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()", is(2)))
-                .andExpect(jsonPath("$[0].name", is("Supplier A")))
-                .andExpect(jsonPath("$[1].name", is("Supplier B")));
+                .andExpect(view().name("admin/supplier_list"))
+                .andExpect(model().attributeExists("suppliers"))
+                .andExpect(model().attribute("suppliers", mockSuppliers));
+    }
+
+    @Test
+    @WithMockUser
+    void showAddSupplierForm_shouldReturnFormPageWithEmptyDTO() throws Exception {
+        mockMvc.perform(get("/supplier/add"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/add_supplier"))
+                .andExpect(model().attributeExists("supplierDTO"));
     }
 
     @Test
@@ -67,6 +75,27 @@ class SupplierControllerTest {
         verify(supplierService).addSupplier(Mockito.any(SupplierDTO.class));
     }
 
+    @Test
+    @WithMockUser
+    void showEditSupplierForm_shouldReturnFormWithSupplierData() throws Exception {
+        Long supplierId = 1L;
+        Supplier supplier = Supplier.builder()
+                .id(supplierId)
+                .name("PT XYZ")
+                .address("Bandung")
+                .contact("0812345678")
+                .category(SupplierCategory.PLUMBING)
+                .build();
+
+        Mockito.when(supplierService.findById(supplierId)).thenReturn(supplier);
+
+        mockMvc.perform(get("/supplier/edit/" + supplierId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/edit_supplier"))
+                .andExpect(model().attributeExists("supplierDTO"))
+                .andExpect(model().attribute("id", supplierId));
+    }
+    
     @Test
     @WithMockUser
     void editSupplier_shouldUpdateAndRedirect() throws Exception {

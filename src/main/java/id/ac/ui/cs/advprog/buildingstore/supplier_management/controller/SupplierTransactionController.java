@@ -6,12 +6,14 @@ import id.ac.ui.cs.advprog.buildingstore.supplier_management.model.PurchaseTrans
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.service.PurchaseTransactionService;
 import id.ac.ui.cs.advprog.buildingstore.supplier_management.service.SupplierService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Controller
 @RequestMapping("/supplier")
@@ -21,17 +23,22 @@ public class SupplierTransactionController {
     private final PurchaseTransactionService transactionService;
     private final SupplierService supplierService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}/transactions")
-    public String showSupplierTransactions(@PathVariable("id") Long supplierId, Model model) throws Exception {
-        Supplier supplier = supplierService.findById(supplierId);
-        CompletableFuture<List<PurchaseTransaction>> future = transactionService.getTransactionsBySupplierAsync(supplier);
-        List<PurchaseTransaction> transactions = future.get();
+    public String showSupplierTransactions(@PathVariable("id") Long supplierId, Model model) {
+        try {
+            Supplier supplier = supplierService.findById(supplierId);
+            List<PurchaseTransaction> transactions = transactionService.getTransactionsBySupplierAsync(supplier).get();
 
-        model.addAttribute("supplier", supplier);
-        model.addAttribute("transactions", transactions);
-        return "admin/supplier_transactions";
+            model.addAttribute("supplier", supplier);
+            model.addAttribute("transactions", transactions);
+            return "admin/supplier_transactions";
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Gagal mengambil data transaksi supplier", e);
+        }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}/transactions/add")
     public String showAddTransactionForm(@PathVariable("id") Long supplierId, Model model) {
         Supplier supplier = supplierService.findById(supplierId);
@@ -40,6 +47,7 @@ public class SupplierTransactionController {
         return "admin/add_transaction";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/transactions/add")
     public String addTransaction(@PathVariable("id") Long supplierId,
                                  @ModelAttribute PurchaseTransactionDTO dto) {

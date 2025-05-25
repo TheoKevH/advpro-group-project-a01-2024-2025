@@ -22,7 +22,7 @@ class SupplierServiceTest {
     @Mock
     private SupplierRepository repo;
 
-    private SupplierService supplierService;
+    private SupplierServiceImpl supplierService;
 
     @BeforeEach
     void setUp() {
@@ -40,11 +40,20 @@ class SupplierServiceTest {
 
         Supplier savedSupplier = captor.getValue();
 
-        assertEquals("PT Maju", savedSupplier.getName());
+        assertEquals("[LISTRIK] PT Maju", savedSupplier.getName());
         assertEquals("Bandung", savedSupplier.getAddress());
         assertEquals("08123456789", savedSupplier.getContact());
         assertEquals(SupplierCategory.LISTRIK, savedSupplier.getCategory());
     }
+
+    @Test
+    void addSupplier_shouldThrowIfDtoIsNull() {
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                supplierService.addSupplier(null)
+        );
+        assertEquals("SupplierDTO cannot be null", ex.getMessage());
+    }
+
 
     @Test
     void editSupplier_shouldUpdateAndSaveCorrectly() {
@@ -77,6 +86,15 @@ class SupplierServiceTest {
         assertEquals("Bandung", updated.getAddress());
         assertEquals("0822222222", updated.getContact());
         assertEquals(SupplierCategory.LISTRIK, updated.getCategory());
+    }
+
+    @Test
+    void editSupplier_shouldThrowIfIdIsNull() {
+        SupplierDTO dto = new SupplierDTO("X", "Y", "Z", SupplierCategory.KAYU);
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                supplierService.editSupplier(null, dto)
+        );
+        assertEquals("Supplier ID cannot be null", ex.getMessage());
     }
 
     @Test
@@ -117,7 +135,36 @@ class SupplierServiceTest {
         assertEquals("Supplier B", result.get(1).getName());
     }
 
+    @Test
+    void findById_shouldReturnSupplier() {
+        Long id = 1L;
+        Supplier supplier = Supplier.builder().id(id).name("Supplier X").build();
+        when(repo.findById(id)).thenReturn(Optional.of(supplier));
 
+        Supplier result = supplierService.findById(id);
 
+        assertNotNull(result);
+        assertEquals("Supplier X", result.getName());
+    }
+
+    @Test
+    void findById_shouldThrowIfNotFound() {
+        Long id = 42L;
+        when(repo.findById(id)).thenReturn(Optional.empty());
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                supplierService.findById(id)
+        );
+
+        assertEquals("Supplier with id 42 not found", ex.getMessage());
+    }
+
+    @Test
+    void findById_shouldThrowIfIdIsNull() {
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                supplierService.findById(null)
+        );
+        assertEquals("Supplier ID cannot be null", ex.getMessage());
+    }
 
 }

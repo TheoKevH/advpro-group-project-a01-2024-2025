@@ -5,9 +5,7 @@ import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepositor
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
@@ -78,8 +76,8 @@ public class AuthControllerTest {
     public void changePassword_WithValidInputs_ShouldRedirectWithSuccess() throws Exception {
         mockMvc.perform(post("/change-password")
                         .param("oldPassword", "oldpass")
-                        .param("newPassword", "newpass")
-                        .param("confirmPassword", "newpass")
+                        .param("newPassword", "newpass123")
+                        .param("confirmPassword", "newpass123")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/profile?success"));
@@ -87,20 +85,41 @@ public class AuthControllerTest {
 
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
-    public void changePassword_WithMismatchedConfirm_ShouldRedirectWithError() throws Exception {
+    public void changePassword_ServiceThrows_ShouldRedirectWithError() throws Exception {
         doThrow(new IllegalArgumentException("Password confirmation does not match"))
                 .when(authService)
                 .changePassword(any(ChangePasswordRequest.class), eq("admin"));
 
         mockMvc.perform(post("/change-password")
                         .param("oldPassword", "oldpass")
-                        .param("newPassword", "newpass")
-                        .param("confirmPassword", "wrongconfirm")
+                        .param("newPassword", "validPassword123")
+                        .param("confirmPassword", "mismatchPassword")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/profile?error"));
     }
 
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    public void changePassword_InvalidForm_ShouldRenderProfileWithError() throws Exception {
+        mockMvc.perform(post("/change-password")
+                        .param("oldPassword", "old")
+                        .param("newPassword", "short")
+                        .param("confirmPassword", "short")
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("profile"))
+                .andExpect(content().string(containsString("My Profile")));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    public void profilePage_ShouldReturnOk() throws Exception {
+        mockMvc.perform(get("/profile"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Profile")));
+    }
 
 
 }

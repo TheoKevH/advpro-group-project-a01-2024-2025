@@ -24,5 +24,6 @@ public class PurchaseTransaction {
     private LocalDateTime date;
 
     @ManyToOne
+    @JoinColumn(name = "supplier_id", nullable = false)
     private Supplier supplier;
 }

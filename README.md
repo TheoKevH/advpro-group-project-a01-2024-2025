@@ -4,7 +4,7 @@
 
 - **Dicky Bayu Sadewo (2306275784)**: Container Diagram
 - **Farrel Ahmad Ilyasa (2306209441)**: Context Diagram
-- **Franky Raymarcell Sinaga (2306227311)**: Penjelasan 2 - 3 Paragraf
+- **Franky Raymarcell Sinaga (2306227311)**: Penjelasan
 - **Theodore Kevin Himawan (2306210973)**: Deployment Diagram
 
 ### Context Diagram
@@ -29,7 +29,13 @@
 ### Future Deployment Diagram
 ![New Deployment Diagram](deploymentdiagram2.png)
 
-## Penjelasan
+## Individual Deliverables (Theodore Kevin Himawan)
+
+### Component Diagram
+![Component Diagram](componentdiagramkevin.png)
+
+### Code Diagram
+![Code Diagram](codediagramkevin.png)
 
 ## Individual Deliverables (Dicky Bayu Sadewo)
 
@@ -38,3 +44,5 @@
 
 ### Code Diagram
 ![Code Diagram](codediagramdicky.png)
+
+## Penjelasan

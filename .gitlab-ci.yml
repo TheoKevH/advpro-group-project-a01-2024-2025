@@ -61,6 +61,24 @@ stages:
 #    - branches
 #    - schedules
 
+# Sonarcloud Code Scanning
+sonarcloud_scan:
+  stage: analysis
+  image: eclipse-temurin:21
+  only:
+    - main
+    - staging
+    - merge_requests
+    - kevin # testing aja
+  before_script:
+    - apt-get update && apt-get install -y wget unzip
+    - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
+    - unzip sonar-scanner-cli-5.0.1.3006-linux.zip
+    - export PATH="$PWD/sonar-scanner-5.0.1.3006-linux/bin:$PATH"
+  script:
+    - chmod +x ./gradlew
+    - ./gradlew build
+    - sonar-scanner -Dsonar.login=$SONAR_TOKEN
 
 deploy_to_ec2:
   stage: deploy
