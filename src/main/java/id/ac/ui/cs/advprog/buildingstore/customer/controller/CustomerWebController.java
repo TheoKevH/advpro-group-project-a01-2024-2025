@@ -1,10 +1,13 @@
 package id.ac.ui.cs.advprog.buildingstore.customer.controller;
 
+import id.ac.ui.cs.advprog.buildingstore.authentication.model.Role;
+import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.customer.model.Customer;
 import id.ac.ui.cs.advprog.buildingstore.customer.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/customer")
+@RequestMapping("/customers")
 public class CustomerWebController {
     @Autowired
     private CustomerService customerService;
@@ -30,11 +33,39 @@ public class CustomerWebController {
         return "redirect:list";
     }
 
-    @GetMapping("/list")
+    @GetMapping("/")
     public String listCustomers(Model model) {
         List<Customer> customers = customerService.getAllCustomers();
         model.addAttribute("customers", customers);
-        return "customer/listCustomers";
+        return "customer/listCustomer";
+    }
+
+    @GetMapping("")
+    public String customersHomepage(Authentication authentication, Model model) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+
+        User user = (User) authentication.getPrincipal();
+        if (user.getRole() == Role.ADMIN) {
+            // Admin view - get all customers
+            List<Customer> customers = customerService.getAllCustomers();
+            model.addAttribute("customers", customers);
+            model.addAttribute("isAdmin", true);
+        } else {
+            // Regular user view
+            Customer customer = customerService.getCustomerByUserId(user.getId());
+            if (customer != null) {
+                model.addAttribute("customer", customer);
+                model.addAttribute("hasCustomerAccount", true);
+            } else {
+                model.addAttribute("hasCustomerAccount", false);
+            }
+        }
+
+        List<Customer> customers = customerService.getAllCustomers();
+        model.addAttribute("customers", customers);
+        return "customer/customerHomepage";
     }
 
     @GetMapping("/edit/{id}")
@@ -54,20 +85,5 @@ public class CustomerWebController {
     public String deleteCustomerForm(@PathVariable String id, Model model) {
         customerService.deleteCustomer(id);
         return "redirect:list";
-    }
-
-    @GetMapping
-    public ResponseEntity<List<Customer>> getAllCustomers() {
-        try {
-            List<Customer> customers = customerService.getAllCustomers();
-
-            if (customers.isEmpty()) {
-                return ResponseEntity.noContent().build();
-            }
-
-            return ResponseEntity.ok(customers);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
     }
 }

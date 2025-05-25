@@ -13,7 +13,7 @@ import java.util.UUID;
 public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    private Long id;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private User user;
@@ -23,14 +23,4 @@ public class Customer {
 
     @Column(unique = true)
     private String phone;
-
-    public Customer() {}
-
-    public Customer(String userId) {
-        this.id = userId;
-    }
-
-    public Customer(User user) {
-        this.user = user;
-    }
 }

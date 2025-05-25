@@ -56,7 +56,7 @@ public class CustomerController {
 
     // PUT /api/customers/{id} - Updates customer, returns JSON
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable String id, @RequestBody Customer customer) {
+    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
         try {
             customer.setId(id);
             Customer updatedCustomer = customerService.updateCustomer(customer);

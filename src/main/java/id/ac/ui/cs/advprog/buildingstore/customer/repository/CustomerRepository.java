@@ -6,12 +6,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
 public class CustomerRepository {
     // Mapping of Customer based id
-    private Map<String, Customer> customerMap = new ConcurrentHashMap<>();
+    private Map<Long, Customer> customerMap = new ConcurrentHashMap<>();
     // Mapping of Customer based user
     private Map<User, Customer> userMap = new ConcurrentHashMap<>();
 
@@ -32,7 +33,17 @@ public class CustomerRepository {
         if (customerMap.containsKey(id)) {
             return customerMap.get(id);
         }
+        return null;
+    }
 
+    public Customer getCustomerByUserId(Long userId) {
+        Iterator<Customer> customers = getAllCustomers();
+        while (customers.hasNext()) {
+            Customer customer = customers.next();
+            if (Objects.equals(customer.getUser().getId(), userId)) {
+                return customer;
+            }
+        }
         return null;
     }
 

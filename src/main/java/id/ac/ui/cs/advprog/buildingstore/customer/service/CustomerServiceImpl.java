@@ -35,6 +35,11 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public Customer getCustomerByUserId(Long userId) {
+        return customerRepository.getCustomerByUserId(userId);
+    }
+
+    @Override
     public Customer updateCustomer(Customer customer) {
         return customerRepository.updateCustomer(customer);
     }
