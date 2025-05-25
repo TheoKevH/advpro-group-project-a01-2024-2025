@@ -80,4 +80,9 @@ public class TransactionController {
         }
     }
 
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<List<Transaction>> getByCustomer(@PathVariable String customerId) {
+        List<Transaction> trxList = service.getTransactionsByCustomer(customerId);
+        return ResponseEntity.ok(trxList);
+    }
 }
