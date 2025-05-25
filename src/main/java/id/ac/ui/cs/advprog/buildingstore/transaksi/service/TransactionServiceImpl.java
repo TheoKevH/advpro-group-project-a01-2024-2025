@@ -73,4 +73,12 @@ public class TransactionServiceImpl implements TransactionService {
         trx.setItems(items);
         return repository.save(trx);
     }
+
+    @Override
+    public List<Transaction> getTransactionsByCustomer(String customerId) {
+        return repository.findAll().stream()
+                .filter(trx -> trx.getCustomerId() != null && trx.getCustomerId().equals(customerId))
+                .toList();
+    }
+
 }
