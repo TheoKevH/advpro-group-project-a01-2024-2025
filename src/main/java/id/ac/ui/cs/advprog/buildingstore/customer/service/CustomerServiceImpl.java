@@ -17,7 +17,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Customer addCustomer(Customer customer) {
-        customerRepository.addCustomer(customer);
+        customerRepository.createCustomer(customer);
         return customer;
     }
 
@@ -27,5 +27,20 @@ public class CustomerServiceImpl implements CustomerService {
         List<Customer> allCustomer = new ArrayList<>();
         customerIterator.forEachRemaining(allCustomer::add);
         return allCustomer;
+    }
+
+    @Override
+    public Customer getCustomer(String id) {
+        return customerRepository.getCustomer(id);
+    }
+
+    @Override
+    public Customer updateCustomer(Customer customer) {
+        return customerRepository.updateCustomer(customer);
+    }
+
+    @Override
+    public void deleteCustomer(String id) {
+        customerRepository.removeCustomer(id);
     }
 }
