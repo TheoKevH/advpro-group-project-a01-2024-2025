@@ -121,6 +121,26 @@ class TransactionServiceTest {
         assertEquals(3, result.getItems().get(1).getQuantity());
     }
 
+    @Test
+    void testGetTransactionsByCustomer_shouldReturnOnlyMatchingTransactions() {
+        Transaction trx1 = Transaction.builder()
+                .transactionId("trx-1")
+                .customerId("cust-123")
+                .build();
+
+        Transaction trx2 = Transaction.builder()
+                .transactionId("trx-2")
+                .customerId("cust-999")
+                .build();
+
+        when(repository.findAll()).thenReturn(List.of(trx1, trx2));
+
+        List<Transaction> result = service.getTransactionsByCustomer("cust-123");
+
+        assertEquals(1, result.size());
+        assertEquals("trx-1", result.get(0).getTransactionId());
+    }
+
 
 
 }
