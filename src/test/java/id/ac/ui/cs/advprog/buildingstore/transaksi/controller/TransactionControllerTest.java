@@ -144,4 +144,24 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.items[1].quantity").value(3));
     }
 
+    @Test
+    void testGetTransactionsByCustomer_shouldReturnFilteredTransactions() throws Exception {
+        Transaction trx1 = Transaction.builder()
+                .transactionId("trx-1")
+                .customerId("cust-321")
+                .build();
+
+        Transaction trx2 = Transaction.builder()
+                .transactionId("trx-2")
+                .customerId("cust-321")
+                .build();
+
+        when(service.getTransactionsByCustomer("cust-321")).thenReturn(List.of(trx1, trx2));
+
+        mockMvc.perform(get("/api/transactions/customer/cust-321"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2));
+    }
+
+
 }
