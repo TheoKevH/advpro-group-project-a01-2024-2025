@@ -13,4 +13,5 @@ public interface TransactionService {
     Transaction markAsPaid(String id);
     void cancelTransaction(String id);
     Transaction createTransaction(String customerId, List<TransactionItem> items);
+    Transaction updateTransaction(String id, List<TransactionItem> items);
 }

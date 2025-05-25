@@ -63,4 +63,14 @@ public class TransactionServiceImpl implements TransactionService {
         repository.save(trx);
         asyncTransactionLogger.logTransactionStatus(trx);
     }
+
+    @Override
+    public Transaction updateTransaction(String id, List<TransactionItem> items) {
+        Transaction trx = repository.findById(id);
+        if (!trx.isEditable()) {
+            throw new IllegalStateException("Transaksi tidak bisa diedit karena sudah bukan IN_PROGRESS");
+        }
+        trx.setItems(items);
+        return repository.save(trx);
+    }
 }
