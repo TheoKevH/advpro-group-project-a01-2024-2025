@@ -48,13 +48,15 @@ public class TransactionPageController {
 
     @GetMapping("/transaksi/new")
     public String showCreateTransactionPage(Model model) {
-        List<ProductDTO> products = Arrays.asList(
-                restTemplate.getForObject("/api/products", ProductDTO[].class)
+        ProductDTO[] products = restTemplate.getForObject(
+                "http://localhost:8080/api/product", ProductDTO[].class
         );
 
-        model.addAttribute("products", products);
+        model.addAttribute("products", List.of(products));
         model.addAttribute("createRequest", new CreateTransactionRequest());
-        return "transaksi/create";
+
+        return "transaksi/createNewTransaksi";
     }
+
 
 }
