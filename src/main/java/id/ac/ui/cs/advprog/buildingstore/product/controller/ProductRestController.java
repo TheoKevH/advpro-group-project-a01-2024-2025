@@ -51,7 +51,7 @@ public class ProductRestController {
     @PutMapping("/{id}")
     public ProductDTO updateProductQuantity(@PathVariable String id, @RequestBody Integer quantity) {
         Product existingProduct = service.findById(id);
-        existingProduct.setProductQuantity(quantity);
+        existingProduct.setProductQuantity(existingProduct.getProductQuantity() - quantity);
         Product updatedProduct = service.edit(ProductFactory.toDTO(existingProduct));
         return ProductFactory.toDTO(updatedProduct);
     }
