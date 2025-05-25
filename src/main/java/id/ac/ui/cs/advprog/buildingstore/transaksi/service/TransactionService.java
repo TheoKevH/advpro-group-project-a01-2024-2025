@@ -14,4 +14,5 @@ public interface TransactionService {
     void cancelTransaction(String id);
     Transaction createTransaction(String customerId, List<TransactionItem> items);
     Transaction updateTransaction(String id, List<TransactionItem> items);
+    List<Transaction> getTransactionsByCustomer(String customerId);
 }
