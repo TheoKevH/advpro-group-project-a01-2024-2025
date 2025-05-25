@@ -3,6 +3,7 @@ package id.ac.ui.cs.advprog.buildingstore.authentication.controller;
 import id.ac.ui.cs.advprog.buildingstore.authentication.dto.ChangePasswordRequest;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,6 +25,7 @@ public class AuthController {
         return "login";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/dashboard")
     public String adminDashboard(Model model, Principal principal) {
         model.addAttribute("username", principal.getName());
