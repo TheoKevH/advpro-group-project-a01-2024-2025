@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.buildingstore.transaksi.controller;
 
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CreateTransactionRequest;
+import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.UpdateTransactionRequest;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -65,4 +66,18 @@ public class TransactionController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateTransaction(
+            @PathVariable String id,
+            @RequestBody UpdateTransactionRequest request
+    ) {
+        try {
+            Transaction updated = service.updateTransaction(id, request.getItems());
+            return ResponseEntity.ok(updated);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }

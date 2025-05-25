@@ -3,6 +3,7 @@ package id.ac.ui.cs.advprog.buildingstore.transaksi.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import id.ac.ui.cs.advprog.buildingstore.config.TestSecurityConfig;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CreateTransactionRequest;
+import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.UpdateTransactionRequest;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.TransactionItem;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.service.TransactionService;
@@ -117,4 +118,30 @@ class TransactionControllerTest {
                         .with(csrf()))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    void testUpdateTransaction_shouldReplaceItems() throws Exception {
+        List<TransactionItem> updatedItems = List.of(
+                new TransactionItem("prod-1", 5),
+                new TransactionItem("prod-2", 3)
+        );
+
+        UpdateTransactionRequest updateRequest = new UpdateTransactionRequest();
+        updateRequest.setItems(updatedItems);
+
+        dummy.setItems(updatedItems);
+        when(service.updateTransaction(dummyId, updatedItems)).thenReturn(dummy);
+
+        mockMvc.perform(put("/api/transactions/" + dummyId)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items.length()").value(2))
+                .andExpect(jsonPath("$.items[0].productId").value("prod-1"))
+                .andExpect(jsonPath("$.items[0].quantity").value(5))
+                .andExpect(jsonPath("$.items[1].productId").value("prod-2"))
+                .andExpect(jsonPath("$.items[1].quantity").value(3));
+    }
+
 }
