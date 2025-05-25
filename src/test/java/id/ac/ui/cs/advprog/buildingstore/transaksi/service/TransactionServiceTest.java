@@ -7,6 +7,7 @@ import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.TransactionItem;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.repository.InMemoryTransactionRepository;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.repository.TransactionRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -54,6 +55,15 @@ class TransactionServiceTest {
 
     @Test
     void testCreateTransaction_withItems_shouldStoreCorrectly() {
+        String username = "kasir01";
+        Authentication auth = new UsernamePasswordAuthenticationToken(username, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername(username);
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
         List<TransactionItem> items = List.of(
                 new TransactionItem("prod-12", 2),
                 new TransactionItem("prod-34", 1)
@@ -177,8 +187,11 @@ class TransactionServiceTest {
         user.setId(1L);
         user.setUsername("kasir01");
 
+        User other = new User();
+        other.setId(2L);
+
         Transaction t1 = Transaction.builder().transactionId("trx-1").createdBy(user).build();
-        Transaction t2 = Transaction.builder().transactionId("trx-2").createdBy(new User()).build();
+        Transaction t2 = Transaction.builder().transactionId("trx-2").createdBy(other).build();
 
         when(repository.findAll()).thenReturn(List.of(t1, t2));
 
@@ -188,9 +201,9 @@ class TransactionServiceTest {
         assertEquals("trx-1", result.get(0).getTransactionId());
     }
 
-
-
-
-
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 }
 
