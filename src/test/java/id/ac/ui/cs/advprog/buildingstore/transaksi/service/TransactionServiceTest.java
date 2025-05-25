@@ -141,6 +141,26 @@ class TransactionServiceTest {
         assertEquals("trx-1", result.get(0).getTransactionId());
     }
 
+    @Test
+    void testCreateTransaction_shouldStoreCreatedByUser() {
+        String username = "kasir01";
+        Authentication auth = new UsernamePasswordAuthenticationToken(username, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername(username);
+
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+        when(repository.save(any(Transaction.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Transaction result = service.createTransaction("cust-123", List.of(new TransactionItem("prod-1", 1)));
+
+        assertNotNull(result.getCreatedBy());
+        assertEquals("kasir01", result.getCreatedBy().getUsername());
+    }
+
+
 
 
 }
