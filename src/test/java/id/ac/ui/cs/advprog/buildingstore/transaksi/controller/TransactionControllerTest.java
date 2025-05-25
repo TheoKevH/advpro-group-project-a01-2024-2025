@@ -172,6 +172,7 @@ class TransactionControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "kasir01", roles = {"KASIR"})
     void testGetMyTransactions_shouldReturnOnlyUserTransactions() throws Exception {
         String username = "kasir01";
 
