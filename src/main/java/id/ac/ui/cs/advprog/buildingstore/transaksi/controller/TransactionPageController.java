@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -48,8 +49,12 @@ public class TransactionPageController {
 
     @GetMapping("/transaksi/new")
     public String showCreateTransactionPage(Model model) {
+        String url = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/product")
+                .toUriString();
+
         ProductDTO[] products = restTemplate.getForObject(
-                "http://localhost:8080/api/product", ProductDTO[].class
+                url, ProductDTO[].class
         );
 
         model.addAttribute("products", List.of(products));
