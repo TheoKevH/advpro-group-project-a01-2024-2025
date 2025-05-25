@@ -5,56 +5,16 @@ import id.ac.ui.cs.advprog.buildingstore.customer.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
-@RequestMapping("/customer")
+@RestController
+@RequestMapping("/api/customers")
+@CrossOrigin(origins = "*")
 public class CustomerController {
     @Autowired
     private CustomerService customerService;
-
-    @GetMapping("/register")
-    public String registerCustomerPage(Model model) {
-        Customer customer = new Customer();
-        model.addAttribute("customer", customer);
-        return "customer/registerCustomer";
-    }
-
-    @PostMapping("/register")
-    public String registerCustomerPost(@ModelAttribute Customer customer, Model model) {
-        customerService.addCustomer(customer);
-        return "redirect:list";
-    }
-
-    @GetMapping("/list")
-    public String listCustomers(Model model) {
-        List<Customer> customers = customerService.getAllCustomers();
-        model.addAttribute("customers", customers);
-        return "customer/listCustomers";
-    }
-
-    @GetMapping("/edit/{id}")
-    public String editCustomerPage(@PathVariable String id, Model model) {
-        Customer customer = customerService.getCustomer(id);
-        model.addAttribute("customer", customer);
-        return "customer/editCustomer";
-    }
-
-    @PostMapping("/edit")
-    public String editCustomerPost(@ModelAttribute Customer customer, Model model) {
-        customerService.addCustomer(customer);
-        return "redirect:list";
-    }
-
-    @GetMapping("/delete/{id}")
-    public String deleteCustomerForm(@PathVariable String id, Model model) {
-        customerService.deleteCustomer(id);
-        return "redirect:list";
-    }
 
     @GetMapping
     public ResponseEntity<List<Customer>> getAllCustomers() {
@@ -66,6 +26,52 @@ public class CustomerController {
             }
 
             return ResponseEntity.ok(customers);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // GET /api/customers/{id} - Returns JSON of single customer
+    @GetMapping("/{id}")
+    public ResponseEntity<Customer> getCustomerById(@PathVariable String id) {
+        Customer customer = customerService.getCustomer(id);
+
+        if (customer != null) {
+            return ResponseEntity.ok(customer);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // POST /api/customers - Creates new customer, returns JSON
+    @PostMapping
+    public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
+        try {
+            Customer savedCustomer = customerService.addCustomer(customer);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedCustomer);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    // PUT /api/customers/{id} - Updates customer, returns JSON
+    @PutMapping("/{id}")
+    public ResponseEntity<Customer> updateCustomer(@PathVariable String id, @RequestBody Customer customer) {
+        try {
+            customer.setId(id);
+            Customer updatedCustomer = customerService.updateCustomer(customer);
+            return ResponseEntity.ok(updatedCustomer);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    // DELETE /api/customers/{id} - Deletes customer
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCustomer(@PathVariable String id) {
+        try {
+            customerService.deleteCustomer(id);
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
