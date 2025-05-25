@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.buildingstore.transaksi.service;
 
+import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.TransactionItem;
 
@@ -15,4 +16,5 @@ public interface TransactionService {
     Transaction createTransaction(String customerId, List<TransactionItem> items);
     Transaction updateTransaction(String id, List<TransactionItem> items);
     List<Transaction> getTransactionsByCustomer(String customerId);
+    List<Transaction> getTransactionsByUser(User user);
 }

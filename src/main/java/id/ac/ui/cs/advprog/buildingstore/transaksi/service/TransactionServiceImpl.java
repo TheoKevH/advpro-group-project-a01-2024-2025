@@ -5,6 +5,12 @@ import id.ac.ui.cs.advprog.buildingstore.transaksi.model.TransactionItem;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepository;
+import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
 
 import java.util.List;
 
@@ -17,12 +23,19 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private AsyncTransactionLogger asyncTransactionLogger;
 
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public Transaction createTransaction(String customerId, List<TransactionItem> items) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User creator = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
         Transaction transaction = Transaction.builder().
                 customerId(customerId).
                 items(items).
+                createdBy(creator).
                 build();
 
         return repository.save(transaction);
@@ -80,5 +93,13 @@ public class TransactionServiceImpl implements TransactionService {
                 .filter(trx -> trx.getCustomerId() != null && trx.getCustomerId().equals(customerId))
                 .toList();
     }
+
+    @Override
+    public List<Transaction> getTransactionsByUser(User user) {
+        return repository.findAll().stream()
+                .filter(trx -> trx.getCreatedBy() != null && trx.getCreatedBy().getId().equals(user.getId()))
+                .toList();
+    }
+
 
 }

@@ -1,11 +1,16 @@
 package id.ac.ui.cs.advprog.buildingstore.transaksi.controller;
 
+import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
+import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepository;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CreateTransactionRequest;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.UpdateTransactionRequest;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +21,7 @@ import java.util.List;
 public class TransactionController {
 
     private final TransactionService service;
+    private final UserRepository userRepository;
 
     @PostMapping
     public ResponseEntity<Transaction> createTransaction(@RequestBody CreateTransactionRequest request) {
@@ -85,4 +91,22 @@ public class TransactionController {
         List<Transaction> trxList = service.getTransactionsByCustomer(customerId);
         return ResponseEntity.ok(trxList);
     }
+
+    @GetMapping("/my-transactions")
+    public ResponseEntity<List<Transaction>> getMyTransactions() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return ResponseEntity.ok(service.getTransactionsByUser(user));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/created-by/{username}")
+    public ResponseEntity<List<Transaction>> getTransactionsByCreator(@PathVariable String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return ResponseEntity.ok(service.getTransactionsByUser(user));
+    }
+
+
 }

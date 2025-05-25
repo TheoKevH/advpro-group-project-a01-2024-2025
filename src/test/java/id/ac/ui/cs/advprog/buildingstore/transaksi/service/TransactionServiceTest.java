@@ -1,5 +1,7 @@
 package id.ac.ui.cs.advprog.buildingstore.transaksi.service;
 
+import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
+import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepository;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.enums.TransactionStatus;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.TransactionItem;
@@ -9,8 +11,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,6 +32,10 @@ class TransactionServiceTest {
 
     @MockBean
     TransactionRepository repository;
+
+    @MockBean
+    UserRepository userRepository;
+
 
     @Test
     void testMoveToPayment_shouldUpdateStateToAwaitingPayment() {
