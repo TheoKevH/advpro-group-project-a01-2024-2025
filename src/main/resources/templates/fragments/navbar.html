@@ -30,9 +30,9 @@
             </a>
 
             <!-- ADMIN & CASHIER -->
-            <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''CASHIER'')')}" th:href="@{/sales}"
+            <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''CASHIER'')')}" th:href="@{/transaksi}"
                class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition">
-                Sales
+                Transactions
             </a>
 
             <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''CASHIER'')')}" th:href="@{/customers}"
