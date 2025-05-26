@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -220,5 +221,79 @@ class TransactionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].transactionId").value("trx-18"));
+    }
+
+    @Test
+    void testGetTransactionById_shouldReturn404WhenNotFound() throws Exception {
+        when(service.getTransaction("non-existent")).thenReturn(null);
+
+        mockMvc.perform(get("/api/transactions/non-existent"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testMoveToPayment_shouldReturnBadRequestOnError() throws Exception {
+        when(service.moveToPayment(dummyId)).thenThrow(new IllegalStateException("Invalid state"));
+
+        mockMvc.perform(put("/api/transactions/" + dummyId + "/payment").with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Invalid state"));
+    }
+
+    @Test
+    void testMarkAsPaid_shouldReturnBadRequestOnError() throws Exception {
+        when(service.markAsPaid(dummyId)).thenThrow(new IllegalStateException("Not ready"));
+
+        mockMvc.perform(put("/api/transactions/" + dummyId + "/pay").with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Not ready"));
+    }
+
+    @Test
+    void testUpdateTransaction_shouldReturnBadRequestOnError() throws Exception {
+        UpdateTransactionRequest req = new UpdateTransactionRequest();
+        req.setItems(List.of(new TransactionItem("p1", 1)));
+
+        when(service.updateTransaction(dummyId, req.getItems()))
+                .thenThrow(new IllegalStateException("Not editable"));
+
+        mockMvc.perform(put("/api/transactions/" + dummyId)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Not editable"));
+    }
+
+    @Test
+    void testCancelTransaction_shouldReturnBadRequestOnError() throws Exception {
+        doThrow(new IllegalStateException("Already paid"))
+                .when(service).cancelTransaction(dummyId);
+
+        mockMvc.perform(delete("/api/transactions/" + dummyId).with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Already paid"));
+    }
+
+    @Test
+    void testGetMyTransactions_shouldReturnUnauthorizedIfUserNotFound() throws Exception {
+        String username = "ghost";
+        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/transactions/my-transactions")
+                        .with(csrf())
+                        .with(user(username)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void testGetTransactionsByCreator_shouldReturnUnauthorizedIfUserNotFound() throws Exception {
+        String targetUsername = "ghost-kasir";
+        when(userRepository.findByUsername(targetUsername)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/transactions/created-by/" + targetUsername)
+                        .with(csrf())
+                        .with(user("admin01").roles("ADMIN")))
+                .andExpect(status().isForbidden());
     }
 }

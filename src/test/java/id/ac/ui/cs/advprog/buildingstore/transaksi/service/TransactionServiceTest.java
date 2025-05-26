@@ -154,7 +154,12 @@ class TransactionServiceTest {
                 .customerId("cust-999")
                 .build();
 
-        when(repository.findAll()).thenReturn(List.of(trx1, trx2));
+        Transaction trx3 = Transaction.builder()
+                .transactionId("trx-3")
+                .customerId(null)
+                .build();
+
+        when(repository.findAll()).thenReturn(List.of(trx1, trx2, trx3));
 
         List<Transaction> result = service.getTransactionsByCustomer("cust-123");
 
@@ -199,6 +204,80 @@ class TransactionServiceTest {
 
         assertEquals(1, result.size());
         assertEquals("trx-1", result.get(0).getTransactionId());
+    }
+
+    @Test
+    void testMarkAsPaid_shouldUpdateStatusToCompleted() {
+        Transaction trx = Transaction.builder()
+                .customerId("cust-001")
+                .items(List.of(new TransactionItem("prod-1", 1)))
+                .build();
+        trx.moveToPayment();
+
+        when(repository.findById(trx.getTransactionId())).thenReturn(trx);
+        when(repository.save(any(Transaction.class))).thenReturn(trx);
+
+        Transaction result = service.markAsPaid(trx.getTransactionId());
+
+        assertEquals(TransactionStatus.COMPLETED, result.getStatus());
+    }
+
+    @Test
+    void testCancelTransaction_shouldSetStatusToCancelled() {
+        Transaction trx = Transaction.builder()
+                .customerId("cust-123")
+                .items(List.of(new TransactionItem("prod-1", 2)))
+                .build();
+
+        when(repository.findById(trx.getTransactionId())).thenReturn(trx);
+        when(repository.save(any(Transaction.class))).thenReturn(trx);
+
+        assertDoesNotThrow(() -> service.cancelTransaction(trx.getTransactionId()));
+        assertEquals(TransactionStatus.CANCELLED, trx.getStatus());
+    }
+
+    @Test
+    void testUpdateTransaction_shouldThrowIfNotEditable() {
+        Transaction trx = Transaction.builder()
+                .transactionId("trx-xx")
+                .items(List.of(new TransactionItem("prod-1", 2)))
+                .build();
+        trx.moveToPayment();  // not editable
+
+        when(repository.findById("trx-xx")).thenReturn(trx);
+
+        List<TransactionItem> updated = List.of(new TransactionItem("prod-2", 1));
+
+        assertThrows(IllegalStateException.class, () -> {
+            service.updateTransaction("trx-xx", updated);
+        });
+    }
+
+    @Test
+    void testGetTransaction_shouldReturnTransaction() {
+        Transaction trx = Transaction.builder()
+                .transactionId("abc123")
+                .build();
+
+        when(repository.findById("abc123")).thenReturn(trx);
+
+        Transaction result = service.getTransaction("abc123");
+
+        assertEquals("abc123", result.getTransactionId());
+    }
+
+    @Test
+    void testGetAllTransactions_shouldReturnAll() {
+        List<Transaction> all = List.of(
+                Transaction.builder().transactionId("a").build(),
+                Transaction.builder().transactionId("b").build()
+        );
+
+        when(repository.findAll()).thenReturn(all);
+
+        List<Transaction> result = service.getAllTransactions();
+
+        assertEquals(2, result.size());
     }
 
     @AfterEach
