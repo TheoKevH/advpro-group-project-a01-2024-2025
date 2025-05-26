@@ -17,6 +17,8 @@ public interface CustomerService {
     // Checker
     boolean existsByEmail(String email);
     boolean existsByPhone(String phone);
+    boolean existsByName(String name);
     boolean existsByEmailAndIdNot(String email, Long id);
     boolean existsByPhoneAndIdNot(String phone, Long id);
+    boolean existsByNameAndIdNot(String name, Long id);
 }

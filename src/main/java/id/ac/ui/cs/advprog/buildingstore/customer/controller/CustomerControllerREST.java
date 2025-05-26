@@ -58,10 +58,11 @@ public class CustomerControllerREST {
     @PostMapping
     public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
         try {
-            if (customerService.existsByEmail(customer.getEmail())) {
+            if (customerService.existsByName(customer.getName())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
-            }
-            if (customerService.existsByPhone(customer.getPhone())) {
+            } else if (customerService.existsByEmail(customer.getEmail())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            } else if (customerService.existsByPhone(customer.getPhone())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
             }
 
@@ -76,10 +77,11 @@ public class CustomerControllerREST {
     @PutMapping("/{id}")
     public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
         try {
-            if (customerService.existsByEmail(customer.getEmail())) {
+            if (customerService.existsByNameAndIdNot(customer.getName(), id)) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
-            }
-            if (customerService.existsByPhone(customer.getPhone())) {
+            } else if (customerService.existsByEmailAndIdNot(customer.getEmail(), id)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            } else if (customerService.existsByPhoneAndIdNot(customer.getPhone(), id)) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
             }
 

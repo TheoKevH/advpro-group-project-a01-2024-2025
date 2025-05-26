@@ -11,6 +11,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     boolean existsByPhone(String phone);
 
+    boolean existsByName(String name);
+
     Optional<Customer> findByEmail(String email);
 
     Optional<Customer> findByPhone(String phone);
@@ -19,4 +21,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     boolean existsByEmailAndIdNot(String email, Long id);
 
     boolean existsByPhoneAndIdNot(String phone, Long id);
+
+    boolean existsByNameAndIdNot(String name, Long id);
 }

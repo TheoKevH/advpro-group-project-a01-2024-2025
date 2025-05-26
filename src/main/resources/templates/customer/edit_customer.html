@@ -2,12 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Create Customer - Admin</title>
+  <title>Edit Customer</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
 <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-  <h1 class="text-2xl font-bold mb-6 text-gray-800 text-center">Create Customer</h1>
+  <h1 class="text-2xl font-bold mb-6 text-gray-800 text-center">Edit Customer</h1>
 
   <form th:action="@{/customers/edit}" th:object="${customer}" method="post" class="space-y-4" novalidate>
     <!-- Display general error messages -->
@@ -94,7 +94,7 @@
     <div class="pt-4 space-y-3">
       <button type="submit"
               class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-200">
-        Create Customer
+        Edit Customer
       </button>
       <a th:href="@{/customers}"
          class="block w-full text-center bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400 transition duration-200">

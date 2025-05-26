@@ -60,6 +60,11 @@ public class CustomerServiceImpl implements CustomerService {
         return customerRepository.existsByPhone(phone);
     }
 
+    @Override
+    public boolean existsByName(String name) {
+        return customerRepository.existsByName(name);
+    }
+
     // Methods for update operations (checking duplicates excluding current customer)
     @Override
     public boolean existsByEmailAndIdNot(String email, Long id) {
@@ -69,5 +74,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public boolean existsByPhoneAndIdNot(String phone, Long id) {
         return customerRepository.existsByPhoneAndIdNot(phone, id);
+    }
+
+    @Override
+    public boolean existsByNameAndIdNot(String name, Long id) {
+        return customerRepository.existsByNameAndIdNot(name, id);
     }
 }

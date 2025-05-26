@@ -58,10 +58,12 @@ public class CustomerControllerPage {
     // === POST MAPPING ===
     @PostMapping("/create")
     public String createCustomerPost(@Valid @ModelAttribute Customer customer, BindingResult bindingResult, Model model) {
+        if (customerService.existsByName(customer.getName())) {
+            bindingResult.rejectValue("name", "duplicate.name", "Name is already taken");
+        }
         if (customerService.existsByEmail(customer.getEmail())) {
             bindingResult.rejectValue("email", "duplicate.email", "Email is already in use");
         }
-
         if (customerService.existsByPhone(customer.getPhone())) {
             bindingResult.rejectValue("phone", "duplicate.phone", "Phone is already in use");
         }
@@ -74,7 +76,9 @@ public class CustomerControllerPage {
             customerService.addCustomer(customer);
             return "redirect:/customers";
         } catch (DataIntegrityViolationException e) {
-            if (e.getMessage().contains("email")) {
+            if (e.getMessage().contains("name")) {
+                bindingResult.rejectValue("name", "duplicate.name", "Name is already taken");
+            } else if (e.getMessage().contains("email")) {
                 bindingResult.rejectValue("email", "duplicate.email", "Email is already in use");
             } else if (e.getMessage().contains("phone")) {
                 bindingResult.rejectValue("phone", "duplicate.phone", "Phone is already in use");
@@ -92,6 +96,9 @@ public class CustomerControllerPage {
 
     @PostMapping("/edit")
     public String editCustomerPost(@Valid @ModelAttribute Customer customer, BindingResult bindingResult, Model model) {
+        if (customerService.existsByNameAndIdNot(customer.getName(), customer.getId())) {
+            bindingResult.rejectValue("name", "duplicate.name", "Name is already taken");
+        }
         if (customerService.existsByEmailAndIdNot(customer.getEmail(), customer.getId())) {
             bindingResult.rejectValue("email", "duplicate.email", "Email is already in use");
         }
@@ -106,7 +113,9 @@ public class CustomerControllerPage {
             customerService.updateCustomer(customer);
             return "redirect:/customers";
         } catch (DataIntegrityViolationException e) {
-            if (e.getMessage().contains("email")) {
+            if (e.getMessage().contains("name")) {
+                bindingResult.rejectValue("name", "duplicate.name", "Name is already taken");
+            } else if (e.getMessage().contains("email")) {
                 bindingResult.rejectValue("email", "duplicate.email", "Email is already in use");
             } else if (e.getMessage().contains("phone")) {
                 bindingResult.rejectValue("phone", "duplicate.phone", "Phone is already in use");
