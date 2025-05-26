@@ -9,4 +9,5 @@ public class CustomerDTO {
     private String id;
     private String email;
     private String phone;
+    private String name;
 }

@@ -62,8 +62,8 @@ public class TransactionPageController {
 
         CustomerDTO[] customers = restTemplate.getForObject(customerUrl, CustomerDTO[].class);
 
-        model.addAttribute("customers", List.of(customers));
-        model.addAttribute("products", List.of(products));
+        model.addAttribute("products", products != null ? List.of(products) : List.of());
+        model.addAttribute("customers", customers != null ? List.of(customers) : List.of());
         model.addAttribute("createRequest", new CreateTransactionRequest());
 
         return "transaksi/createNewTransaksi";

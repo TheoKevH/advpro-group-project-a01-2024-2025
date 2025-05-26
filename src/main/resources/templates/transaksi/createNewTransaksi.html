@@ -22,6 +22,14 @@
 
     <!-- Form -->
     <form th:action="@{/api/transactions}" method="post" class="space-y-6 bg-white p-6 rounded-xl shadow">
+        <!-- Select Customer -->
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Customer</h2>
+            <select name="customerId" id="customerId" class="border px-3 py-2 rounded w-full">
+                <option value="" disabled selected>Select a customer</option>
+                <option th:each="cust : ${customers}" th:value="${cust.id}" th:text="${cust.name}"></option>
+            </select>
+        </div>
 
         <!-- Produk Pilihan -->
         <div>
