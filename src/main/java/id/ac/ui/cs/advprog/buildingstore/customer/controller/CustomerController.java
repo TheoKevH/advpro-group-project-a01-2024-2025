@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.buildingstore.customer.controller;
 
+import id.ac.ui.cs.advprog.buildingstore.customer.dto.CustomerDTO;
 import id.ac.ui.cs.advprog.buildingstore.customer.model.Customer;
 import id.ac.ui.cs.advprog.buildingstore.customer.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ public class CustomerController {
     private CustomerService customerService;
 
     @GetMapping
-    public ResponseEntity<List<Customer>> getAllCustomers() {
+    public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
         try {
             List<Customer> customers = customerService.getAllCustomers();
 
@@ -25,11 +26,21 @@ public class CustomerController {
                 return ResponseEntity.noContent().build();
             }
 
-            return ResponseEntity.ok(customers);
+            List<CustomerDTO> result = customers.stream().map(customer -> {
+                CustomerDTO dto = new CustomerDTO();
+                dto.setId(String.valueOf(customer.getId()));
+                dto.setName(customer.getName());
+                dto.setEmail(customer.getEmail());
+                dto.setPhone(customer.getPhone());
+                return dto;
+            }).toList();
+
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 
     // GET /api/customers/{id} - Returns JSON of single customer
     @GetMapping("/{id}")
