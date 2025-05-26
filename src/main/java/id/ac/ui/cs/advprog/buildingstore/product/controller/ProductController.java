@@ -5,11 +5,13 @@ import id.ac.ui.cs.advprog.buildingstore.product.model.Product;
 import id.ac.ui.cs.advprog.buildingstore.product.service.ProductService;
 import id.ac.ui.cs.advprog.buildingstore.product.dto.ProductDTO;
 
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.BindingResult;
 
 import java.util.List;
 
@@ -28,9 +30,21 @@ public class ProductController {
     }
 
     @PostMapping("/create")
-    public String createProductPost(@ModelAttribute ProductDTO productDTO) {
-        service.create(productDTO);
-        return "redirect:/product";
+    public String createProductPost(@Valid @ModelAttribute("product") ProductDTO productDTO,
+                                    BindingResult bindingResult,
+                                    Model model) {
+
+        if (bindingResult.hasErrors()) {
+            return "product/createProduct";
+        }
+
+        try {
+            service.create(productDTO);
+            return "redirect:/product";
+        } catch (IllegalArgumentException ex) {
+            bindingResult.rejectValue("productName", "error.productName", "Nama harus berbeda");
+            return "product/createProduct";
+        }
     }
 
     @GetMapping("")
@@ -51,7 +65,14 @@ public class ProductController {
     }
 
     @PostMapping("/edit")
-    public String editProductPost(@ModelAttribute ProductDTO productDTO) {
+    public String editProductPost(@Valid @ModelAttribute("product") ProductDTO productDTO,
+                                  BindingResult bindingResult,
+                                  Model model) {
+
+        if (bindingResult.hasErrors()) {
+            return "product/editProduct";
+        }
+
         service.edit(productDTO);
         return "redirect:/product";
     }
