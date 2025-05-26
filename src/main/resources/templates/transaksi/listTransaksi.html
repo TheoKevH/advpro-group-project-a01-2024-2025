@@ -123,13 +123,22 @@
 
                 document.getElementById("modalTotalPrice").textContent = "Rp " + total.toLocaleString();
 
-                const row = document.getElementById(`trx_${transactionId}`);
-                const statusCell = row.querySelector("td:nth-child(3)");
-                statusCell.textContent = "AWAITING_PAYMENT";
+                fetch(`/api/transactions/${transactionId}/payment`, {
+                    method: 'PUT'
+                }).then(res => {
+                    if (res.ok) {
+                        const row = document.getElementById(`trx_${transactionId}`);
+                        const statusCell = row.querySelector("td:nth-child(3)");
+                        statusCell.textContent = "AWAITING_PAYMENT";
+                    } else {
+                        res.text().then(msg => alert("Error moving to payment: " + msg));
+                    }
+                });
 
                 document.getElementById("payModal").classList.remove("hidden");
             });
     }
+
 
     function closePayModal() {
         document.getElementById("payModal").classList.add("hidden");
