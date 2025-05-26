@@ -6,6 +6,7 @@ import id.ac.ui.cs.advprog.buildingstore.product.model.Product;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CreateTransactionRequest;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CustomerDTO;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.ProductDTO;
+import id.ac.ui.cs.advprog.buildingstore.transaksi.enums.TransactionStatus;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,11 @@ public class TransactionPageController {
         } else {
             transactions = transactionService.getTransactionsByUser(user);
         }
+
+        transactions = transactions.stream()
+                .filter(trx -> trx.getStatus() != TransactionStatus.CANCELLED)
+                .toList();
+
 
         String customerUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/api/customers")

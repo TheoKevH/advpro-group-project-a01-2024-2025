@@ -16,6 +16,7 @@ public class AwaitingPaymentState implements TransactionState {
     @Override
     public void markAsPaid(Transaction transaction) {
         transaction.setState(new CompletedState());
+        transaction.setStatus(TransactionStatus.COMPLETED);
     }
 
     @Override
