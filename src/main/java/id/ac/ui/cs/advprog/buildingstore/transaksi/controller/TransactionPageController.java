@@ -14,6 +14,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -67,6 +69,12 @@ public class TransactionPageController {
         model.addAttribute("createRequest", new CreateTransactionRequest());
 
         return "transaksi/createNewTransaksi";
+    }
+
+    @PostMapping("/transaksi/create")
+    public String createTransaction(@ModelAttribute CreateTransactionRequest request) {
+        transactionService.createTransaction(request.getCustomerId(), request.getItems());
+        return "redirect:/transaksi";
     }
 
 

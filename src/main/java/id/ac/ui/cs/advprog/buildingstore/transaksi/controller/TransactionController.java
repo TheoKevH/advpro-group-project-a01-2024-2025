@@ -7,6 +7,7 @@ import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.UpdateTransactionRequest;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.service.TransactionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,11 +24,18 @@ public class TransactionController {
     private final TransactionService service;
     private final UserRepository userRepository;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Transaction> createTransaction(@RequestBody CreateTransactionRequest request) {
         Transaction trx = service.createTransaction(request.getCustomerId(), request.getItems());
         return ResponseEntity.ok(trx);
     }
+
+    @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String createTransactionFromForm(@ModelAttribute CreateTransactionRequest request) {
+        service.createTransaction(request.getCustomerId(), request.getItems());
+        return "redirect:/transaksi";
+    }
+
 
     @GetMapping
     public ResponseEntity<List<Transaction>> getAllTransactions() {
