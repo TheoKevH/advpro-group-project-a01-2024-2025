@@ -248,6 +248,18 @@ class TransactionServiceTest {
         });
     }
 
+    @Test
+    void testGetTransaction_shouldReturnTransaction() {
+        Transaction trx = Transaction.builder()
+                .transactionId("abc123")
+                .build();
+
+        when(repository.findById("abc123")).thenReturn(trx);
+
+        Transaction result = service.getTransaction("abc123");
+
+        assertEquals("abc123", result.getTransactionId());
+    }
 
 
 
