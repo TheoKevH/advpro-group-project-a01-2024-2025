@@ -4,6 +4,7 @@ import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepository;
 import id.ac.ui.cs.advprog.buildingstore.product.model.Product;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CreateTransactionRequest;
+import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CustomerDTO;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.ProductDTO;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.service.TransactionService;
@@ -49,14 +50,19 @@ public class TransactionPageController {
 
     @GetMapping("/transaksi/new")
     public String showCreateTransactionPage(Model model) {
-        String url = ServletUriComponentsBuilder.fromCurrentContextPath()
+        String customerUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/customers")
+                .toUriString();
+
+        String productUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/api/product")
                 .toUriString();
 
-        ProductDTO[] products = restTemplate.getForObject(
-                url, ProductDTO[].class
-        );
+        ProductDTO[] products = restTemplate.getForObject(productUrl, ProductDTO[].class);
 
+        CustomerDTO[] customers = restTemplate.getForObject(customerUrl, CustomerDTO[].class);
+
+        model.addAttribute("customers", List.of(customers));
         model.addAttribute("products", List.of(products));
         model.addAttribute("createRequest", new CreateTransactionRequest());
 
