@@ -73,6 +73,8 @@ public class TransactionPageController {
 
     @PostMapping("/transaksi/create")
     public String createTransaction(@ModelAttribute CreateTransactionRequest request) {
+        System.out.println(">>> Customer ID: " + request.getCustomerId());
+        System.out.println(">>> Items: " + request.getItems());
         transactionService.createTransaction(request.getCustomerId(), request.getItems());
         return "redirect:/transaksi";
     }
