@@ -66,10 +66,12 @@ class ProductRestControllerTest {
         Product p1 = Product.builder()
                 .productName("Prod 1")
                 .productPrice(BigDecimal.valueOf(10))
+                .productQuantity(1)
                 .build();
         Product p2 = Product.builder()
                 .productName("Prod 2")
-                .productPrice(BigDecimal.ZERO)  // Should be filtered out
+                .productPrice(BigDecimal.ZERO)
+                .productQuantity(1)
                 .build();
 
         when(service.findAll()).thenReturn(List.of(p1, p2));
@@ -81,6 +83,42 @@ class ProductRestControllerTest {
 
         verify(service).findAll();
     }
+    @Test
+    void getAllProducts_shouldFilterOutInvalidProducts() throws Exception {
+        Product validProduct = Product.builder()
+                .productName("Valid Product")
+                .productPrice(BigDecimal.valueOf(100))
+                .productQuantity(5)
+                .build();
+
+        Product zeroPrice = Product.builder()
+                .productName("Zero Price Product")
+                .productPrice(BigDecimal.ZERO)
+                .productQuantity(10)
+                .build();
+
+        Product nullPrice = Product.builder()
+                .productName("Null Price Product")
+                .productPrice(null)
+                .productQuantity(10)
+                .build();
+
+        Product zeroQuantity = Product.builder()
+                .productName("Zero Quantity Product")
+                .productPrice(BigDecimal.valueOf(100))
+                .productQuantity(0)
+                .build();
+
+        when(service.findAll()).thenReturn(List.of(validProduct, zeroPrice, nullPrice, zeroQuantity));
+
+        mockMvc.perform(get("/api/product"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].productName").value("Valid Product"));
+
+        verify(service).findAll();
+    }
+
 
     @Test
     void getProductById_shouldReturnProductDTO() throws Exception {
@@ -161,16 +199,19 @@ class ProductRestControllerTest {
         Product p1 = Product.builder()
                 .productName("Valid Product")
                 .productPrice(BigDecimal.valueOf(100))
+                .productQuantity(1)
                 .build();
 
         Product p2 = Product.builder()
                 .productName("Zero Price Product")
                 .productPrice(BigDecimal.ZERO)
+                .productQuantity(1)
                 .build();
 
         Product p3 = Product.builder()
                 .productName("Null Price Product")
                 .productPrice(null)
+                .productQuantity(1)
                 .build();
 
         when(service.findAll()).thenReturn(List.of(p1, p2, p3));
