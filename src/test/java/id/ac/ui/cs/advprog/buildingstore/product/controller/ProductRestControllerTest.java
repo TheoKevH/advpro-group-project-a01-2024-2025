@@ -1,11 +1,11 @@
 package id.ac.ui.cs.advprog.buildingstore.product.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import id.ac.ui.cs.advprog.buildingstore.product.dto.ProductDTO;
 import id.ac.ui.cs.advprog.buildingstore.product.dto.ProductRequestDTO;
 import id.ac.ui.cs.advprog.buildingstore.product.factory.ProductFactory;
 import id.ac.ui.cs.advprog.buildingstore.product.model.Product;
 import id.ac.ui.cs.advprog.buildingstore.product.service.ProductService;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -16,11 +16,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 class ProductRestControllerTest {
 
@@ -67,10 +66,12 @@ class ProductRestControllerTest {
         Product p1 = Product.builder()
                 .productName("Prod 1")
                 .productPrice(BigDecimal.valueOf(10))
+                .productQuantity(1)
                 .build();
         Product p2 = Product.builder()
                 .productName("Prod 2")
-                .productPrice(BigDecimal.ZERO)  // Should be filtered out
+                .productPrice(BigDecimal.ZERO)
+                .productQuantity(1)
                 .build();
 
         when(service.findAll()).thenReturn(List.of(p1, p2));
@@ -82,11 +83,67 @@ class ProductRestControllerTest {
 
         verify(service).findAll();
     }
+    @Test
+    void getAllProducts_shouldFilterOutInvalidProducts() throws Exception {
+        Product validProduct = Product.builder()
+                .productName("Valid Product")
+                .productPrice(BigDecimal.valueOf(100))
+                .productQuantity(5)
+                .build();
+
+        Product zeroPrice = Product.builder()
+                .productName("Zero Price Product")
+                .productPrice(BigDecimal.ZERO)
+                .productQuantity(10)
+                .build();
+
+        Product nullPrice = Product.builder()
+                .productName("Null Price Product")
+                .productPrice(null)
+                .productQuantity(10)
+                .build();
+
+        Product zeroQuantity = Product.builder()
+                .productName("Zero Quantity Product")
+                .productPrice(BigDecimal.valueOf(100))
+                .productQuantity(0)
+                .build();
+
+        when(service.findAll()).thenReturn(List.of(validProduct, zeroPrice, nullPrice, zeroQuantity));
+
+        mockMvc.perform(get("/api/product"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].productName").value("Valid Product"));
+
+        verify(service).findAll();
+    }
+
+
+    @Test
+    void getProductById_shouldReturnProductDTO() throws Exception {
+        String id = "abc123";
+        Product product = Product.builder()
+                .productId(id)
+                .productName("ProdById")
+                .productPrice(BigDecimal.valueOf(20))
+                .productQuantity(3)
+                .build();
+
+        when(service.findById(id)).thenReturn(product);
+
+        mockMvc.perform(get("/api/product/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productId").value(id))
+                .andExpect(jsonPath("$.productName").value("ProdById"));
+
+        verify(service).findById(id);
+    }
 
     @Test
     void updateProductQuantity_shouldUpdateAndReturnProductDTO() throws Exception {
         String id = "123";
-        Integer quantity = 10;
+        Integer quantity = 2;
 
         Product existing = Product.builder()
                 .productId(id)
@@ -95,7 +152,7 @@ class ProductRestControllerTest {
 
         Product updated = Product.builder()
                 .productId(id)
-                .productQuantity(quantity)
+                .productQuantity(3)
                 .build();
 
         when(service.findById(id)).thenReturn(existing);
@@ -105,7 +162,7 @@ class ProductRestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(quantity)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productQuantity").value(quantity));
+                .andExpect(jsonPath("$.productQuantity").value(3));
 
         verify(service).findById(id);
         verify(service).edit(any());
@@ -129,13 +186,6 @@ class ProductRestControllerTest {
         request.setProductName("InsertProd");
         request.setProductQuantity(7);
 
-        Product dummyProduct = new Product();
-        dummyProduct.setProductId("some-id");
-        dummyProduct.setProductName(request.getProductName());
-        dummyProduct.setProductQuantity(request.getProductQuantity());
-
-        when(service.insert(any(ProductRequestDTO.class))).thenReturn(dummyProduct);
-
         mockMvc.perform(post("/api/product/insert")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -143,4 +193,35 @@ class ProductRestControllerTest {
 
         verify(service).insert(any(ProductRequestDTO.class));
     }
+
+    @Test
+    void getAllProducts_shouldFilterOutProductsWithNullOrZeroPrice() throws Exception {
+        Product p1 = Product.builder()
+                .productName("Valid Product")
+                .productPrice(BigDecimal.valueOf(100))
+                .productQuantity(1)
+                .build();
+
+        Product p2 = Product.builder()
+                .productName("Zero Price Product")
+                .productPrice(BigDecimal.ZERO)
+                .productQuantity(1)
+                .build();
+
+        Product p3 = Product.builder()
+                .productName("Null Price Product")
+                .productPrice(null)
+                .productQuantity(1)
+                .build();
+
+        when(service.findAll()).thenReturn(List.of(p1, p2, p3));
+
+        mockMvc.perform(get("/api/product"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].productName").value("Valid Product"))
+                .andExpect(jsonPath("$[1]").doesNotExist());
+
+        verify(service).findAll();
+    }
+
 }
