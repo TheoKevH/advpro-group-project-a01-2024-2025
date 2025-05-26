@@ -7,6 +7,7 @@ import id.ac.ui.cs.advprog.buildingstore.product.service.ProductService;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CreateTransactionRequest;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CustomerDTO;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.ProductDTO;
+import id.ac.ui.cs.advprog.buildingstore.transaksi.enums.TransactionStatus;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.TransactionItem;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.service.TransactionService;
@@ -26,7 +27,9 @@ import org.slf4j.LoggerFactory;
 
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -51,8 +54,26 @@ public class TransactionPageController {
             transactions = transactionService.getTransactionsByUser(user);
         }
 
+        transactions = transactions.stream()
+                .filter(trx -> trx.getStatus() != TransactionStatus.CANCELLED)
+                .toList();
+
+
+        String customerUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/customers")
+                .toUriString();
+        CustomerDTO[] customers = restTemplate.getForObject(customerUrl, CustomerDTO[].class);
+
+        Map<String, String> customerMap = new HashMap<>();
+        if (customers != null) {
+            for (CustomerDTO customer : customers) {
+                customerMap.put(customer.getId(), customer.getName());
+            }
+        }
+
         model.addAttribute("transactions", transactions);
         model.addAttribute("username", user.getUsername());
+        model.addAttribute("customerMap", customerMap);
 
         return "transaksi/listTransaksi";
     }

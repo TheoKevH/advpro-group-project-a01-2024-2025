@@ -11,6 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
 import java.util.List;
@@ -27,6 +29,10 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
+
     @Override
     @Transactional
     public Transaction createTransaction(String customerId, List<TransactionItem> items) {
@@ -42,6 +48,13 @@ public class TransactionServiceImpl implements TransactionService {
 
         for (TransactionItem item : items) {
             item.setTransaction(transaction); // semoga bisaaa woiiii!!!!
+
+            String updateUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/api/product/{id}")
+                    .buildAndExpand(item.getProductId())
+                    .toUriString();
+
+            restTemplate.put(updateUrl, item.getQuantity());
         }
 
         System.out.println("Creating transaction for customer: " + customerId);
