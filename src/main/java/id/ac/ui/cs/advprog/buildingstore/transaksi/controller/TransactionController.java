@@ -2,10 +2,7 @@ package id.ac.ui.cs.advprog.buildingstore.transaksi.controller;
 
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepository;
-import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CreateTransactionRequest;
-import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.ProductDTO;
-import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.TransactionViewDTO;
-import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.UpdateTransactionRequest;
+import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.*;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -124,44 +121,35 @@ public class TransactionController {
     }
 
     @GetMapping("/{id}/view")
-    public ResponseEntity<TransactionViewDTO> getTransactionView(@PathVariable String id) {
+    public ResponseEntity<Map<String, Object>> getTransactionView(@PathVariable String id) {
         Transaction transaction = service.getTransaction(id);
 
-        // Call product service
         String productUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/api/product")
                 .toUriString();
-
         ProductDTO[] allProducts = restTemplate.getForObject(productUrl, ProductDTO[].class);
-
         Map<String, ProductDTO> productMap = new HashMap<>();
-        if (allProducts != null) {
-            for (ProductDTO p : allProducts) {
-                productMap.put(p.getProductId(), p);
-            }
-        }
+        for (ProductDTO p : allProducts) productMap.put(p.getProductId(), p);
 
-        TransactionViewDTO dto = new TransactionViewDTO();
-        dto.setTransactionId(transaction.getTransactionId());
-        dto.setCustomerId(transaction.getCustomerId());
-        dto.setStatus(transaction.getStatus().name());
+        String customerUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/customers/" + transaction.getCustomerId())
+                .toUriString();
+        CustomerDTO customer = restTemplate.getForObject(customerUrl, CustomerDTO.class);
 
-        List<TransactionViewDTO.TransactionItemDTO> itemDTOs = transaction.getItems().stream().map(item -> {
-            TransactionViewDTO.TransactionItemDTO itemDTO = new TransactionViewDTO.TransactionItemDTO();
-            itemDTO.setProductId(item.getProductId());
-            itemDTO.setQuantity(item.getQuantity());
-            ProductDTO product = productMap.get(item.getProductId());
-            if (product != null) {
-                itemDTO.setProductName(product.getProductName());
-                itemDTO.setProductPrice(product.getProductPrice());
-            } else {
-                itemDTO.setProductName("Unknown");
-                itemDTO.setProductPrice(0);
-            }
-            return itemDTO;
+        List<Map<String, Object>> itemViews = transaction.getItems().stream().map(item -> {
+            Map<String, Object> m = new HashMap<>();
+            ProductDTO prod = productMap.get(item.getProductId());
+            m.put("productName", prod != null ? prod.getProductName() : "Unknown");
+            m.put("productPrice", prod != null ? prod.getProductPrice() : 0);
+            m.put("quantity", item.getQuantity());
+            return m;
         }).toList();
 
-        dto.setItems(itemDTOs);
-        return ResponseEntity.ok(dto);
+        Map<String, Object> response = new HashMap<>();
+        response.put("customerName", customer != null ? customer.getName() : "Unknown");
+        response.put("items", itemViews);
+
+        return ResponseEntity.ok(response);
     }
+
 }

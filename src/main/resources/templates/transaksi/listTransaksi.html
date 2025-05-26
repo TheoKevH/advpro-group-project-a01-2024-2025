@@ -54,10 +54,12 @@
 
 
                     <!-- View Button (always visible) -->
-                    <a th:href="@{'/transaksi/' + ${trx.transactionId}}"
-                       class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm font-medium">
+                    <button type="button"
+                            class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm font-medium"
+                            th:attr="onclick=|openDetailModal('${trx.transactionId}')|">
                         View
-                    </a>
+                    </button>
+
 
                     <!-- Cancel Button (only when IN_PROGRESS) -->
                     <button th:if="${trx.status.name() == 'IN_PROGRESS'}"
@@ -138,29 +140,74 @@
             method: 'PUT'
         }).then(res => {
             if (res.ok) {
-                fetch(`/api/transactions/${currentTransactionId}/pay`, {
+                return fetch(`/api/transactions/${currentTransactionId}/pay`, {
                     method: 'PUT'
-                }).then(res2 => {
-                    if (res2.ok) {
-                        const row = document.getElementById(`trx_${currentTransactionId}`);
-                        const statusCell = row.querySelector("td:nth-child(3)");
-                        statusCell.textContent = "COMPLETED";
-
-                        closePayModal();
-                    } else {
-                        res2.text().then(msg => alert("Payment failed: " + msg));
-                    }
                 });
             } else {
-                res.text().then(msg => alert("Error moving to payment: " + msg));
+                return res.text().then(msg => Promise.reject("Error moving to payment: " + msg));
             }
+        }).then(res2 => {
+            if (res2.ok) {
+                const row = document.getElementById(`trx_${currentTransactionId}`);
+                const statusCell = row.querySelector("td:nth-child(3)");
+                statusCell.textContent = "COMPLETED";
+
+                const actionCell = row.querySelector("td:nth-child(5)");
+                actionCell.innerHTML = `
+                <a href="/transaksi/${currentTransactionId}"
+                   class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm font-medium">
+                   View
+                </a>
+            `;
+
+                closePayModal();
+            } else {
+                res2.text().then(msg => alert("Payment failed: " + msg));
+            }
+        }).catch(err => {
+            alert(err);
         });
     }
 
+    function openDetailModal(transactionId) {
+        fetch(`/api/transactions/${transactionId}/view`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('detailCustomerName').textContent = data.customerName;
+
+                let total = 0;
+                const tbody = document.getElementById('detailItemsBody');
+                tbody.innerHTML = '';
+
+                data.items.forEach(item => {
+                    const subtotal = item.quantity * item.productPrice;
+                    total += subtotal;
+
+                    const row = document.createElement('tr');
+                    row.classList.add("border-b");
+                    row.innerHTML = `
+                    <td class="py-2">${item.productName}</td>
+                    <td class="py-2">${item.quantity}</td>
+                    <td class="py-2">Rp ${item.productPrice.toLocaleString()}</td>
+                    <td class="py-2">Rp ${subtotal.toLocaleString()}</td>
+                `;
+                    tbody.appendChild(row);
+                });
+
+                document.getElementById('detailTotalPrice').textContent = `Rp ${total.toLocaleString()}`;
+                document.getElementById('transactionDetailModal').classList.remove("hidden");
+            });
+    }
+
+    function closeDetailModal() {
+        document.getElementById('transactionDetailModal').classList.add("hidden");
+    }
 
 </script>
 
 <div th:replace="~{transaksi/modalPayment :: paymentModal}"></div>
+<div th:replace="~{transaksi/modalDetailTransaksi :: detailModal}"></div>
+
 
 </body>
 </html>
