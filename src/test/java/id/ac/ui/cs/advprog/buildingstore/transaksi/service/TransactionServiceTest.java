@@ -5,7 +5,6 @@ import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepositor
 import id.ac.ui.cs.advprog.buildingstore.transaksi.enums.TransactionStatus;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.TransactionItem;
-import id.ac.ui.cs.advprog.buildingstore.transaksi.repository.InMemoryTransactionRepository;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.repository.TransactionRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,12 +38,16 @@ class TransactionServiceTest {
 
     @Test
     void testMoveToPayment_shouldUpdateStateToAwaitingPayment() {
+        TransactionItem item = new TransactionItem();
+        item.setProductId("prod-1");
+        item.setQuantity(1);
+
         Transaction trx = Transaction.builder()
                 .customerId("cust-1")
-                .items(List.of(new TransactionItem("prod-1", 1)))
+                .items(List.of(item))
                 .build();
 
-        when(repository.findById(trx.getTransactionId())).thenReturn(trx);
+        when(repository.findById(trx.getTransactionId())).thenReturn(Optional.of(trx));
         when(repository.save(any(Transaction.class))).thenReturn(trx);
 
         service.moveToPayment(trx.getTransactionId());
@@ -63,11 +65,18 @@ class TransactionServiceTest {
         user.setId(1L);
         user.setUsername(username);
 
+        TransactionItem item1 = new TransactionItem();
+        item1.setProductId("prod-12");
+        item1.setQuantity(2);
+
+        TransactionItem item2 = new TransactionItem();
+        item2.setProductId("prod-34");
+        item2.setQuantity(1);
+
+        List<TransactionItem> items = List.of(item1, item2);
+
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
-        List<TransactionItem> items = List.of(
-                new TransactionItem("prod-12", 2),
-                new TransactionItem("prod-34", 1)
-        );
+
         String customerId = "cust-789";
 
         Transaction trx = Transaction.builder()
@@ -89,12 +98,16 @@ class TransactionServiceTest {
 
     @Test
     void testMarkAsPaid_directlyFromInProgress_shouldThrowException() {
+        TransactionItem item = new TransactionItem();
+        item.setProductId("prod-1");
+        item.setQuantity(1);
+
         Transaction trx = Transaction.builder()
                 .customerId("cust-123")
-                .items(List.of(new TransactionItem("prod-1", 1)))
+                .items(List.of(item))
                 .build();
 
-        when(repository.findById(trx.getTransactionId())).thenReturn(trx);
+        when(repository.findById(trx.getTransactionId())).thenReturn(Optional.of(trx));
 
         assertThrows(IllegalStateException.class, () -> {
             service.markAsPaid(trx.getTransactionId());
@@ -103,15 +116,19 @@ class TransactionServiceTest {
 
     @Test
     void testCancelAfterCompleted_shouldThrowException() {
+        TransactionItem item = new TransactionItem();
+        item.setProductId("prod-9");
+        item.setQuantity(1);
+
         Transaction trx = Transaction.builder()
                 .customerId("cust-222")
-                .items(List.of(new TransactionItem("prod-9", 1)))
+                .items(List.of(item))
                 .build();
 
         trx.moveToPayment();
         trx.markAsPaid();
 
-        when(repository.findById(trx.getTransactionId())).thenReturn(trx);
+        when(repository.findById(trx.getTransactionId())).thenReturn(Optional.of(trx));
 
         assertThrows(IllegalStateException.class, () -> {
             service.cancelTransaction(trx.getTransactionId());
@@ -121,18 +138,27 @@ class TransactionServiceTest {
     @Test
     void testUpdateTransaction_shouldReplaceItems() {
         String id = UUID.randomUUID().toString();
+        TransactionItem item = new TransactionItem();
+        item.setProductId("prod-1");
+        item.setQuantity(2);
+
         Transaction trx = Transaction.builder()
                 .transactionId(id)
                 .customerId("cust-1")
-                .items(List.of(new TransactionItem("prod-1", 2)))
+                .items(List.of(item))
                 .build();
 
-        List<TransactionItem> updatedItems = List.of(
-                new TransactionItem("prod-1", 5),
-                new TransactionItem("prod-2", 3)
-        );
+        TransactionItem updated1 = new TransactionItem();
+        updated1.setProductId("prod-1");
+        updated1.setQuantity(5);
 
-        when(repository.findById(id)).thenReturn(trx);
+        TransactionItem updated2 = new TransactionItem();
+        updated2.setProductId("prod-2");
+        updated2.setQuantity(3);
+
+        List<TransactionItem> updatedItems = List.of(updated1, updated2);
+
+        when(repository.findById(id)).thenReturn(Optional.of(trx));
         when(repository.save(any(Transaction.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Transaction result = service.updateTransaction(id, updatedItems);
@@ -177,10 +203,14 @@ class TransactionServiceTest {
         user.setId(1L);
         user.setUsername(username);
 
+        TransactionItem item = new TransactionItem();
+        item.setProductId("prod-1");
+        item.setQuantity(1);
+
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
         when(repository.save(any(Transaction.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Transaction result = service.createTransaction("cust-123", List.of(new TransactionItem("prod-1", 1)));
+        Transaction result = service.createTransaction("cust-123", List.of(item));
 
         assertNotNull(result.getCreatedBy());
         assertEquals("kasir01", result.getCreatedBy().getUsername());
@@ -208,13 +238,18 @@ class TransactionServiceTest {
 
     @Test
     void testMarkAsPaid_shouldUpdateStatusToCompleted() {
+        TransactionItem item = new TransactionItem();
+        item.setProductId("prod-1");
+        item.setQuantity(1);
+
         Transaction trx = Transaction.builder()
                 .customerId("cust-001")
-                .items(List.of(new TransactionItem("prod-1", 1)))
+                .items(List.of(item))
                 .build();
+
         trx.moveToPayment();
 
-        when(repository.findById(trx.getTransactionId())).thenReturn(trx);
+        when(repository.findById(trx.getTransactionId())).thenReturn(Optional.of(trx));
         when(repository.save(any(Transaction.class))).thenReturn(trx);
 
         Transaction result = service.markAsPaid(trx.getTransactionId());
@@ -224,12 +259,17 @@ class TransactionServiceTest {
 
     @Test
     void testCancelTransaction_shouldSetStatusToCancelled() {
+        TransactionItem item = new TransactionItem();
+        item.setProductId("prod-1");
+        item.setQuantity(2);
+
         Transaction trx = Transaction.builder()
                 .customerId("cust-123")
-                .items(List.of(new TransactionItem("prod-1", 2)))
+                .items(List.of(item))
                 .build();
 
-        when(repository.findById(trx.getTransactionId())).thenReturn(trx);
+
+        when(repository.findById(trx.getTransactionId())).thenReturn(Optional.of(trx));
         when(repository.save(any(Transaction.class))).thenReturn(trx);
 
         assertDoesNotThrow(() -> service.cancelTransaction(trx.getTransactionId()));
@@ -238,15 +278,24 @@ class TransactionServiceTest {
 
     @Test
     void testUpdateTransaction_shouldThrowIfNotEditable() {
+        TransactionItem item = new TransactionItem();
+        item.setProductId("prod-1");
+        item.setQuantity(2);
+
         Transaction trx = Transaction.builder()
                 .transactionId("trx-xx")
-                .items(List.of(new TransactionItem("prod-1", 2)))
+                .items(List.of(item))
                 .build();
-        trx.moveToPayment();  // not editable
 
-        when(repository.findById("trx-xx")).thenReturn(trx);
+        TransactionItem newItem = new TransactionItem();
+        newItem.setProductId("prod-2");
+        newItem.setQuantity(1);
 
-        List<TransactionItem> updated = List.of(new TransactionItem("prod-2", 1));
+        List<TransactionItem> updated = List.of(newItem);
+
+        trx.moveToPayment();
+
+        when(repository.findById("trx-xx")).thenReturn(Optional.of(trx));
 
         assertThrows(IllegalStateException.class, () -> {
             service.updateTransaction("trx-xx", updated);
@@ -259,7 +308,7 @@ class TransactionServiceTest {
                 .transactionId("abc123")
                 .build();
 
-        when(repository.findById("abc123")).thenReturn(trx);
+        when(repository.findById("abc123")).thenReturn(Optional.of(trx));
 
         Transaction result = service.getTransaction("abc123");
 
