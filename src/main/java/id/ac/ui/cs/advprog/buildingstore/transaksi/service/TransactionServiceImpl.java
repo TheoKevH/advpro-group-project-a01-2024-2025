@@ -10,6 +10,7 @@ import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class TransactionServiceImpl implements TransactionService {
     private UserRepository userRepository;
 
     @Override
+    @Transactional
     public Transaction createTransaction(String customerId, List<TransactionItem> items) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User creator = userRepository.findByUsername(username)
@@ -37,6 +39,10 @@ public class TransactionServiceImpl implements TransactionService {
                 items(items).
                 createdBy(creator).
                 build();
+
+        System.out.println("Creating transaction for customer: " + customerId);
+        System.out.println("Items: " + items.size());
+
 
         return repository.save(transaction);
     }
