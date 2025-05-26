@@ -33,7 +33,7 @@ public class CustomerController {
 
     // GET /api/customers/{id} - Returns JSON of single customer
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable String id) {
+    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
         Customer customer = customerService.getCustomer(id);
 
         if (customer != null) {
@@ -56,7 +56,7 @@ public class CustomerController {
 
     // PUT /api/customers/{id} - Updates customer, returns JSON
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable String id, @RequestBody Customer customer) {
+    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
         try {
             customer.setId(id);
             Customer updatedCustomer = customerService.updateCustomer(customer);
@@ -68,7 +68,7 @@ public class CustomerController {
 
     // DELETE /api/customers/{id} - Deletes customer
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable String id) {
+    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
         try {
             customerService.deleteCustomer(id);
             return ResponseEntity.noContent().build();

@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/customers")
-public class CustomerWebController {
+@RequestMapping("/admin/customers")
+public class CustomerAdminController {
     @Autowired
     private CustomerService customerService;
     @Autowired
@@ -27,13 +27,9 @@ public class CustomerWebController {
         User user = authService.getUserByUsername(username);
         model.addAttribute("user", user);
 
-        if (user.getRole() == Role.ADMIN) {
-            return "redirect:/admin/customers";
-        }
-
-        Customer customer = customerService.getCustomerByUser(user);
-        model.addAttribute("customer", customer);
-        return "customer/homepage";
+        List<Customer> customers = customerService.getAllCustomers();
+        model.addAttribute("customers", customers);
+        return "admin/customer/homepage";
     }
 
     @GetMapping("/create")
@@ -42,58 +38,52 @@ public class CustomerWebController {
         User user = authService.getUserByUsername(username);
         model.addAttribute("user", user);
 
-        if (user.getRole() == Role.ADMIN) {
-            Customer customer = new Customer();
-            model.addAttribute("customer", customer);
+        Customer customer = new Customer();
+        model.addAttribute("customer", customer);
 
-            List<User> userList = authService.getAllUsers();
-            model.addAttribute("users", userList);
-            return "admin/customer/create_customer";
-        } else {
-            Customer customer = new Customer(user);
-            model.addAttribute("customer", customer);
-            return "customer/createCustomer";
-        }
+        List<User> userList = authService.getAllUsers();
+        model.addAttribute("users", userList);
+        return "admin/customer/create_customer";
     }
 
-    @GetMapping("/edit")
-    public String editCustomerPage(Authentication authentication, Model model) {
-        String username = authentication.getName();
-        User user = authService.getUserByUsername(username);
-        Customer customer = customerService.getCustomerByUser(user);
-
+    @GetMapping("/view/{id}")
+    public String viewCustomerPage(@PathVariable Long id, Model model) {
+        Customer customer = customerService.getCustomer(id);
         model.addAttribute("customer", customer);
-        return "customer/editCustomer";
+        return "admin/customer/view_customer";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String editCustomerPage(@PathVariable Long id, Model model) {
+        Customer customer = customerService.getCustomer(id);
+        model.addAttribute("customer", customer);
+        return "admin/customer/edit_customer";
     }
 
     // === POST MAPPING ===
     @PostMapping("/create")
     public String createCustomerPost(@ModelAttribute Customer customer, Model model) {
-        String username = customer.getUser().getUsername();
-        User user = authService.getUserByUsername(username);
+        Long id = customer.getUser().getId();
+        User user = authService.getUserById(id);
 
         customer.setUser(user);
         customerService.addCustomer(customer);
         return "redirect:/customers";
     }
 
-    @PostMapping("/edit")
-    public String editCustomerPost(@ModelAttribute Customer customer, Authentication authentication, Model model) {
-        String username = customer.getUser().getUsername();
-        User user = authService.getUserByUsername(username);
+    @PostMapping("/edit/{id}")
+    public String editCustomerPost(@PathVariable Long id, @ModelAttribute Customer customer, Model model) {
+        Long userId = customer.getUser().getId();
+        User user = authService.getUserById(userId);
 
         customer.setUser(user);
         customerService.updateCustomer(customer);
         return "redirect:/customers";
     }
 
-    @PostMapping("/delete")
-    public String deleteCustomerForm(Authentication authentication, Model model) {
-        String username = authentication.getName();
-        User user = authService.getUserByUsername(username);
-
-        Customer customer = customerService.getCustomerByUser(user);
-        customerService.deleteCustomer(customer.getId());
+    @PostMapping("/delete/{id}")
+    public String deleteCustomerPost(@PathVariable Long id, Model model) {
+        customerService.deleteCustomer(id);
         return "redirect:/customers";
     }
 }
