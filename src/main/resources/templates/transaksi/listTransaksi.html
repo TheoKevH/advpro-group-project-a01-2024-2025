@@ -123,21 +123,10 @@
 
                 document.getElementById("modalTotalPrice").textContent = "Rp " + total.toLocaleString();
 
-                fetch(`/api/transactions/${transactionId}/payment`, {
-                    method: 'PUT'
-                }).then(res => {
-                    if (res.ok) {
-                        const row = document.getElementById(`trx_${transactionId}`);
-                        const statusCell = row.querySelector("td:nth-child(3)");
-                        statusCell.textContent = "AWAITING_PAYMENT";
-                    } else {
-                        res.text().then(msg => alert("Error moving to payment: " + msg));
-                    }
-                });
-
                 document.getElementById("payModal").classList.remove("hidden");
             });
     }
+
 
 
     function closePayModal() {
@@ -145,20 +134,29 @@
     }
 
     function confirmPayment() {
-        fetch(`/api/transactions/${currentTransactionId}/pay`, {
+        fetch(`/api/transactions/${currentTransactionId}/payment`, {
             method: 'PUT'
         }).then(res => {
             if (res.ok) {
-                const row = document.getElementById(`trx_${currentTransactionId}`);
-                const statusCell = row.querySelector("td:nth-child(3)");
-                statusCell.textContent = "COMPLETED";
+                fetch(`/api/transactions/${currentTransactionId}/pay`, {
+                    method: 'PUT'
+                }).then(res2 => {
+                    if (res2.ok) {
+                        const row = document.getElementById(`trx_${currentTransactionId}`);
+                        const statusCell = row.querySelector("td:nth-child(3)");
+                        statusCell.textContent = "COMPLETED";
 
-                closePayModal();
+                        closePayModal();
+                    } else {
+                        res2.text().then(msg => alert("Payment failed: " + msg));
+                    }
+                });
             } else {
-                res.text().then(msg => alert("Payment failed: " + msg));
+                res.text().then(msg => alert("Error moving to payment: " + msg));
             }
         });
     }
+
 
 </script>
 
