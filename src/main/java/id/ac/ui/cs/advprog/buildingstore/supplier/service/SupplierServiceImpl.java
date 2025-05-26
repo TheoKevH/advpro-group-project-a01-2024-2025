@@ -6,8 +6,8 @@ import id.ac.ui.cs.advprog.buildingstore.supplier.model.Supplier;
 import id.ac.ui.cs.advprog.buildingstore.supplier.repository.SupplierRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Slf4j
 @Service
@@ -49,9 +49,9 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
-    public List<Supplier> getAllSuppliers() {
-        List<Supplier> suppliers = repo.findAll();
-        log.info("Retrieved {} suppliers from database", suppliers.size());
+    public Page<Supplier> getAllSuppliers(Pageable pageable) {
+        Page<Supplier> suppliers = repo.findAll(pageable);
+        log.info("Retrieved {} suppliers from database (page: {})", suppliers.getNumberOfElements(), pageable.getPageNumber());
         return suppliers;
     }
 
