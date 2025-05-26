@@ -238,4 +238,13 @@ class TransactionControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Invalid state"));
     }
+
+    @Test
+    void testMarkAsPaid_shouldReturnBadRequestOnError() throws Exception {
+        when(service.markAsPaid(dummyId)).thenThrow(new IllegalStateException("Not ready"));
+
+        mockMvc.perform(put("/api/transactions/" + dummyId + "/pay").with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Not ready"));
+    }
 }
