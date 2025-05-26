@@ -26,7 +26,7 @@ public class WebSecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/register", "/css/**", "/js/**", "/actuator",
-                                "/actuator/prometheus", "/api/product/**").permitAll()
+                                "/actuator/prometheus", "/api/product/**", "/api/customers/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/cashier/**").hasRole("CASHIER")
                         .anyRequest().authenticated()
