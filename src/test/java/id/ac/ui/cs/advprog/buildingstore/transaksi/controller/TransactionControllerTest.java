@@ -54,16 +54,25 @@ class TransactionControllerTest {
     void setup() {
         dummyId = UUID.randomUUID().toString();
 
+        TransactionItem item = new TransactionItem();
+        item.setProductId("prod-1");
+        item.setQuantity(2);
+
         dummy = Transaction.builder()
                 .transactionId(dummyId)
                 .customerId("cust-001")
-                .items(List.of(new TransactionItem("prod-1", 2)))
+                .items(List.of(item))
                 .build();
+
+        TransactionItem requestItem = new TransactionItem();
+        requestItem.setProductId("prod-1");
+        requestItem.setQuantity(2);
 
         createRequest = new CreateTransactionRequest();
         createRequest.setCustomerId("cust-001");
-        createRequest.setItems(List.of(new TransactionItem("prod-1", 2)));
+        createRequest.setItems(List.of(requestItem));
     }
+
 
     @Test
     void testCreateTransaction_shouldReturnNewTransaction() throws Exception {
