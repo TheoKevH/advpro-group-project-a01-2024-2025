@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @Controller
@@ -24,17 +25,15 @@ public class SupplierTransactionController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}/transactions")
-    public String showSupplierTransactions(@PathVariable("id") Long supplierId, Model model) {
-        try {
-            Supplier supplier = supplierService.findById(supplierId);
-            List<PurchaseTransaction> transactions = transactionService.getTransactionsBySupplierAsync(supplier).get();
+    public CompletableFuture<String> showSupplierTransactions(@PathVariable("id") Long supplierId, Model model) {
+        Supplier supplier = supplierService.findById(supplierId);
+        model.addAttribute("supplier", supplier);
 
-            model.addAttribute("supplier", supplier);
-            model.addAttribute("transactions", transactions);
-            return "supplier/supplier_transactions";
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException("Gagal mengambil data transaksi supplier", e);
-        }
+        return transactionService.getTransactionsBySupplierAsync(supplier)
+                .thenApply(transactions -> {
+                    model.addAttribute("transactions", transactions);
+                    return "supplier/supplier_transactions";
+                });
     }
 
     @PreAuthorize("hasRole('ADMIN')")

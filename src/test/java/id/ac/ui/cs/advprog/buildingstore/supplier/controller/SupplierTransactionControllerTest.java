@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -40,7 +39,7 @@ class SupplierTransactionControllerTest {
     }
 
     @Test
-    void showSupplierTransactions_shouldAddAttributesAndReturnView() {
+    void showSupplierTransactions_shouldAddAttributesAndReturnView() throws Exception {
         Supplier supplier = Supplier.builder()
                 .id(1L)
                 .name("PT Baja Utama")
@@ -59,9 +58,9 @@ class SupplierTransactionControllerTest {
 
         when(supplierService.findById(1L)).thenReturn(supplier);
         when(transactionService.getTransactionsBySupplierAsync(supplier))
-                .thenReturn(java.util.concurrent.CompletableFuture.completedFuture(transactions));
+                .thenReturn(CompletableFuture.completedFuture(transactions));
 
-        String result = controller.showSupplierTransactions(1L, model);
+        String result = controller.showSupplierTransactions(1L, model).get();
 
         verify(model).addAttribute("supplier", supplier);
         verify(model).addAttribute("transactions", transactions);
@@ -69,7 +68,7 @@ class SupplierTransactionControllerTest {
     }
 
     @Test
-    void showSupplierTransactions_shouldThrowRuntimeException_whenAsyncFails() throws Exception {
+    void showSupplierTransactions_shouldThrowRuntimeException_whenAsyncFails() {
         Long supplierId = 1L;
         Supplier supplier = Supplier.builder()
                 .id(supplierId)
@@ -78,17 +77,17 @@ class SupplierTransactionControllerTest {
 
         when(supplierService.findById(supplierId)).thenReturn(supplier);
         CompletableFuture<List<PurchaseTransaction>> failingFuture = new CompletableFuture<>();
-        failingFuture.completeExceptionally(new ExecutionException("Async failed", new Throwable()));
+        failingFuture.completeExceptionally(new RuntimeException("Async failed"));
 
         when(transactionService.getTransactionsBySupplierAsync(supplier)).thenReturn(failingFuture);
 
-        Throwable thrown = catchThrowable(() -> {
-            controller.showSupplierTransactions(supplierId, model);
-        });
+        Throwable thrown = catchThrowable(() ->
+                controller.showSupplierTransactions(supplierId, model).join()
+        );
 
         assertThat(thrown)
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Gagal mengambil data transaksi supplier");
+                .hasCauseInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Async failed");
     }
 
 
@@ -109,7 +108,6 @@ class SupplierTransactionControllerTest {
         verify(model).addAttribute(eq("transactionDTO"), any(PurchaseTransactionDTO.class));
         assertThat(result).isEqualTo("supplier/add_transaction");
     }
-
 
     @Test
     void addTransaction_shouldCallServiceAndRedirectToTransactionList() {
