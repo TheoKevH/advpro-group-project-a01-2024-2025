@@ -285,4 +285,15 @@ class TransactionControllerTest {
                         .with(user(username)))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void testGetTransactionsByCreator_shouldReturnUnauthorizedIfUserNotFound() throws Exception {
+        String targetUsername = "ghost-kasir";
+        when(userRepository.findByUsername(targetUsername)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/transactions/created-by/" + targetUsername)
+                        .with(csrf())
+                        .with(user("admin01").roles("ADMIN")))
+                .andExpect(status().isUnauthorized());
+    }
 }
