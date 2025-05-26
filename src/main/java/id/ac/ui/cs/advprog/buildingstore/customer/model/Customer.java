@@ -28,7 +28,7 @@ public class Customer {
 
     @Column(unique = true, nullable = false)
     @NotBlank(message = "Email is required")
-    @Email(message = "Please enter a valid email address")
+    @Email
     @Size(max = 100, message = "Email must not exceed 100 characters")
     private String email;
 
