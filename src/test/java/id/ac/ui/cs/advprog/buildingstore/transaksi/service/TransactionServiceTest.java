@@ -217,6 +217,21 @@ class TransactionServiceTest {
         assertEquals(TransactionStatus.COMPLETED, result.getStatus());
     }
 
+    @Test
+    void testCancelTransaction_shouldSetStatusToCancelled() {
+        Transaction trx = Transaction.builder()
+                .customerId("cust-123")
+                .items(List.of(new TransactionItem("prod-1", 2)))
+                .build();
+
+        when(repository.findById(trx.getTransactionId())).thenReturn(trx);
+        when(repository.save(any(Transaction.class))).thenReturn(trx);
+
+        assertDoesNotThrow(() -> service.cancelTransaction(trx.getTransactionId()));
+        assertEquals(TransactionStatus.CANCELLED, trx.getStatus());
+    }
+
+
 
     @AfterEach
     void clearSecurityContext() {
