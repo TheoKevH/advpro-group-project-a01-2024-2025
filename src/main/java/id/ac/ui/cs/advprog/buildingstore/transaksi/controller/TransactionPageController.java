@@ -3,10 +3,12 @@ package id.ac.ui.cs.advprog.buildingstore.transaksi.controller;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepository;
 import id.ac.ui.cs.advprog.buildingstore.product.model.Product;
+import id.ac.ui.cs.advprog.buildingstore.product.service.ProductService;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CreateTransactionRequest;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CustomerDTO;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.ProductDTO;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
+import id.ac.ui.cs.advprog.buildingstore.transaksi.model.TransactionItem;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +21,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,6 +35,7 @@ public class TransactionPageController {
     private final TransactionService transactionService;
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
+    private static final Logger log = LoggerFactory.getLogger(ProductService.class);
 
 
     @GetMapping("/transaksi")
@@ -76,6 +83,14 @@ public class TransactionPageController {
         System.out.println(">>> Customer ID: " + request.getCustomerId());
         System.out.println(">>> Items: " + request.getItems());
         transactionService.createTransaction(request.getCustomerId(), request.getItems());
+
+        for (TransactionItem item : request.getItems()) {
+            String url = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/api/product/" + item.getProductId())
+                    .toUriString();
+            restTemplate.put(url, item.getQuantity());
+        }
+
         return "redirect:/transaksi";
     }
 
