@@ -20,6 +20,9 @@ public class Customer {
     private User user;
 
     @Column(unique = true, nullable = false)
+    private String name;
+
+    @Column(unique = true, nullable = false)
     private String email;
 
     @Column(unique = true)
