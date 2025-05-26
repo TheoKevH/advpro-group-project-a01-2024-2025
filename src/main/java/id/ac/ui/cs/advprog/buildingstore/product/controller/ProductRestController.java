@@ -22,8 +22,6 @@ public class ProductRestController {
     @Autowired
     private ProductService service;
 
-    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
-
     // Create product (POST /api/products)
     @PostMapping
     public ProductDTO createProduct(@RequestBody ProductDTO dto) {
