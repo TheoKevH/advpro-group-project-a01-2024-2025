@@ -283,7 +283,7 @@ class TransactionControllerTest {
         mockMvc.perform(get("/api/transactions/my-transactions")
                         .with(csrf())
                         .with(user(username)))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -294,6 +294,6 @@ class TransactionControllerTest {
         mockMvc.perform(get("/api/transactions/created-by/" + targetUsername)
                         .with(csrf())
                         .with(user("admin01").roles("ADMIN")))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 }
