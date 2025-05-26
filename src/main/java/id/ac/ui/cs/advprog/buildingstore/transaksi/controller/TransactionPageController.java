@@ -20,7 +20,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -44,8 +46,21 @@ public class TransactionPageController {
             transactions = transactionService.getTransactionsByUser(user);
         }
 
+        String customerUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/customers")
+                .toUriString();
+        CustomerDTO[] customers = restTemplate.getForObject(customerUrl, CustomerDTO[].class);
+
+        Map<String, String> customerMap = new HashMap<>();
+        if (customers != null) {
+            for (CustomerDTO customer : customers) {
+                customerMap.put(customer.getId(), customer.getName());
+            }
+        }
+
         model.addAttribute("transactions", transactions);
         model.addAttribute("username", user.getUsername());
+        model.addAttribute("customerMap", customerMap);
 
         return "transaksi/listTransaksi";
     }
@@ -76,6 +91,7 @@ public class TransactionPageController {
         System.out.println(">>> Customer ID: " + request.getCustomerId());
         System.out.println(">>> Items: " + request.getItems());
         transactionService.createTransaction(request.getCustomerId(), request.getItems());
+
         return "redirect:/transaksi";
     }
 
