@@ -14,6 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -35,6 +37,8 @@ class TransactionServiceTest {
     @MockBean
     UserRepository userRepository;
 
+    @MockBean
+    private RestTemplate restTemplate;
 
     @Test
     void testMoveToPayment_shouldUpdateStateToAwaitingPayment() {
@@ -76,25 +80,27 @@ class TransactionServiceTest {
         List<TransactionItem> items = List.of(item1, item2);
 
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
-
-        String customerId = "cust-789";
-
-        Transaction trx = Transaction.builder()
-                .customerId(customerId)
+        when(repository.save(any(Transaction.class))).thenReturn(Transaction.builder()
+                .transactionId(UUID.randomUUID().toString())
+                .customerId("cust-789")
+                .createdBy(user)
                 .items(items)
-                .build();
+                .status(TransactionStatus.IN_PROGRESS)
+                .build()
+        );
 
-        when(repository.save(any(Transaction.class))).thenReturn(trx);
+        doNothing().when(restTemplate).put(any(String.class), any(Integer.class));
 
-        Transaction result = service.createTransaction(customerId, items);
+        Transaction result = service.createTransaction("cust-789", items);
 
         assertNotNull(result.getTransactionId());
-        assertEquals(customerId, result.getCustomerId());
+        assertEquals("cust-789", result.getCustomerId());
         assertEquals(TransactionStatus.IN_PROGRESS, result.getStatus());
         assertEquals(2, result.getItems().size());
         assertEquals("prod-12", result.getItems().get(0).getProductId());
         assertEquals(2, result.getItems().get(0).getQuantity());
     }
+
 
     @Test
     void testMarkAsPaid_directlyFromInProgress_shouldThrowException() {
