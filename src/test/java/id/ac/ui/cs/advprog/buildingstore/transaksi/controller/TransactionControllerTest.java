@@ -274,4 +274,15 @@ class TransactionControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Already paid"));
     }
+
+    @Test
+    void testGetMyTransactions_shouldReturnUnauthorizedIfUserNotFound() throws Exception {
+        String username = "ghost";
+        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/transactions/my-transactions")
+                        .with(csrf())
+                        .with(user(username)))
+                .andExpect(status().isUnauthorized());
+    }
 }
