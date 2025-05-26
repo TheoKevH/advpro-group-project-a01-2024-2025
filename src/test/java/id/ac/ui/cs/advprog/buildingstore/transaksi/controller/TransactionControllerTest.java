@@ -139,10 +139,15 @@ class TransactionControllerTest {
 
     @Test
     void testUpdateTransaction_shouldReplaceItems() throws Exception {
-        List<TransactionItem> updatedItems = List.of(
-                new TransactionItem("prod-1", 5),
-                new TransactionItem("prod-2", 3)
-        );
+        TransactionItem itemA = new TransactionItem();
+        itemA.setProductId("prod-1");
+        itemA.setQuantity(5);
+
+        TransactionItem itemB = new TransactionItem();
+        itemB.setProductId("prod-2");
+        itemB.setQuantity(3);
+
+        List<TransactionItem> updatedItems = List.of(itemA, itemB);
 
         UpdateTransactionRequest updateRequest = new UpdateTransactionRequest();
         updateRequest.setItems(updatedItems);
@@ -261,7 +266,10 @@ class TransactionControllerTest {
     @Test
     void testUpdateTransaction_shouldReturnBadRequestOnError() throws Exception {
         UpdateTransactionRequest req = new UpdateTransactionRequest();
-        req.setItems(List.of(new TransactionItem("p1", 1)));
+        TransactionItem item1 = new TransactionItem();
+        item1.setProductId("p1");
+        item1.setQuantity(1);;
+        req.setItems(List.of(item1));
 
         when(service.updateTransaction(dummyId, req.getItems()))
                 .thenThrow(new IllegalStateException("Not editable"));

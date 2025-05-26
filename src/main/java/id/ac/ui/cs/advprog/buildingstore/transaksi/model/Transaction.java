@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static id.ac.ui.cs.advprog.buildingstore.transaksi.enums.TransactionStatus.*;
+
 @Entity
 @Table(name = "transaction")
 @Getter
@@ -29,15 +31,42 @@ public class Transaction {
     @JoinColumn(name = "created_by_id")
     private User createdBy;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    @Builder.Default
+    private TransactionStatus status = TransactionStatus.IN_PROGRESS;
 
     @Builder.Default
-    @Transient
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TransactionItem> items = new ArrayList<>();
 
     @Builder.Default
     @Transient
     private TransactionState state = new InProgressState();
+
+    @PostLoad
+    private void initializeStateAfterLoad() {
+        if (this.status != null) {
+            switch (this.status) {
+                case IN_PROGRESS:
+                    this.state = new InProgressState();
+                    break;
+                case AWAITING_PAYMENT:
+                    this.state = new AwaitingPaymentState();
+                    break;
+                case COMPLETED:
+                    this.state = new CompletedState();
+                    break;
+                case CANCELLED:
+                    this.state = new CancelledState();
+                    break;
+                default:
+                    this.state = new InProgressState(); // Fallback
+            }
+        } else {
+            this.state = new InProgressState();
+        }
+    }
 
     // Using State Pattern because the transactions will have different statuses that behaves differently
 
@@ -58,6 +87,6 @@ public class Transaction {
     }
 
     public boolean isEditable() {
-        return state.getStatus() == TransactionStatus.IN_PROGRESS;
+        return state.getStatus() == IN_PROGRESS;
     }
 }
