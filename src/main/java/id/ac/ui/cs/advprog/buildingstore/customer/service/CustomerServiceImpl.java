@@ -9,44 +9,49 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
-    @Autowired
-    private CustomerRepository customerRepository;
+    private final CustomerRepository customerRepository;
 
+    @Autowired
+    public CustomerServiceImpl(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+    }
 
     @Override
     public Customer addCustomer(Customer customer) {
-        customerRepository.createCustomer(customer);
-        return customer;
+        Customer savedCustomer = customerRepository.save(customer);
+        return savedCustomer;
     }
 
     @Override
     public List<Customer> getAllCustomers() {
-        Iterator<Customer> customerIterator = customerRepository.getAllCustomers();
-        List<Customer> allCustomer = new ArrayList<>();
-        customerIterator.forEachRemaining(allCustomer::add);
-        return allCustomer;
+        return customerRepository.findAll();
     }
 
     @Override
-    public Customer getCustomer(String id) {
-        return customerRepository.getCustomer(id);
+    public Customer getCustomer(Long id) {
+        return customerRepository.findById(id).orElse(null);
     }
 
     @Override
     public Customer getCustomerByUser(User user) {
-        return customerRepository.getCustomerByUser(user);
+        return customerRepository.findByUser(user).orElse(null);
     }
 
     @Override
     public Customer updateCustomer(Customer customer) {
-        return customerRepository.updateCustomer(customer);
+        if (customer.getId() == null || !customerRepository.existsById(customer.getId())) {
+            throw new IllegalArgumentException("Customer not found or ID is null");
+        }
+        return customerRepository.save(customer);
     }
 
     @Override
-    public void deleteCustomer(String id) {
-        customerRepository.removeCustomer(id);
+    public void deleteCustomer(Long id) {
+        customerRepository.deleteById(id);
     }
 }

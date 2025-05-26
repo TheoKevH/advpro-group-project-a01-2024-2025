@@ -13,8 +13,8 @@ import java.util.UUID;
 @Getter @Setter
 public class Customer {
     @Id
-    @Column(name = "id", unique = true, nullable = false, updatable = false)
-    private String id = UUID.randomUUID().toString();
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private User user;
