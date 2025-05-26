@@ -247,4 +247,20 @@ class TransactionControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Not ready"));
     }
+
+    @Test
+    void testUpdateTransaction_shouldReturnBadRequestOnError() throws Exception {
+        UpdateTransactionRequest req = new UpdateTransactionRequest();
+        req.setItems(List.of(new TransactionItem("p1", 1)));
+
+        when(service.updateTransaction(dummyId, req.getItems()))
+                .thenThrow(new IllegalStateException("Not editable"));
+
+        mockMvc.perform(put("/api/transactions/" + dummyId)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Not editable"));
+    }
 }
