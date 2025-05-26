@@ -44,12 +44,14 @@
                 <td class="px-4 py-2 font-semibold" th:text="${trx.status}">IN_PROGRESS</td>
                 <td class="px-4 py-2" th:text="${#lists.size(trx.items)}">3</td>
                 <td class="px-4 py-2 space-x-2">
-                    <!-- Pay Button (only when status is AWAITING_PAYMENT) -->
-                    <a th:if="${trx.status.name() == 'AWAITING_PAYMENT'}"
-                       th:href="@{'/transaksi/' + ${trx.transactionId} + '/pay'}"
-                       class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm font-medium">
+                    <!-- Pay Button (only when status is IN_PROGRESS) -->
+                    <button th:if="${trx.status.name() == 'IN_PROGRESS'}"
+                            type="button"
+                            th:attr="onclick=|openPayModal('${trx.transactionId}')|"
+                            class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm font-medium">
                         Pay
-                    </a>
+                    </button>
+
 
                     <!-- View Button (always visible) -->
                     <a th:href="@{'/transaksi/' + ${trx.transactionId}}"
@@ -105,8 +107,53 @@
         });
     }
 
+    let currentTransactionId = null;
+
+    function openPayModal(transactionId) {
+        currentTransactionId = transactionId;
+
+        fetch(`/api/transactions/${transactionId}/view`)
+            .then(res => res.json())
+            .then(data => {
+                const items = data.items;
+                let total = 0;
+                items.forEach(item => {
+                    total += item.quantity * item.productPrice;
+                });
+
+                document.getElementById("modalTotalPrice").textContent = "Rp " + total.toLocaleString();
+
+                const row = document.getElementById(`trx_${transactionId}`);
+                const statusCell = row.querySelector("td:nth-child(3)");
+                statusCell.textContent = "AWAITING_PAYMENT";
+
+                document.getElementById("payModal").classList.remove("hidden");
+            });
+    }
+
+    function closePayModal() {
+        document.getElementById("payModal").classList.add("hidden");
+    }
+
+    function confirmPayment() {
+        fetch(`/api/transactions/${currentTransactionId}/pay`, {
+            method: 'PUT'
+        }).then(res => {
+            if (res.ok) {
+                const row = document.getElementById(`trx_${currentTransactionId}`);
+                const statusCell = row.querySelector("td:nth-child(3)");
+                statusCell.textContent = "COMPLETED";
+
+                closePayModal();
+            } else {
+                res.text().then(msg => alert("Payment failed: " + msg));
+            }
+        });
+    }
+
 </script>
 
+<div th:replace="~{transaksi/modalPayment :: paymentModal}"></div>
 
 </body>
 </html>

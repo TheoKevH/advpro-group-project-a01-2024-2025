@@ -3,6 +3,8 @@ package id.ac.ui.cs.advprog.buildingstore.transaksi.controller;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepository;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CreateTransactionRequest;
+import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.ProductDTO;
+import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.TransactionViewDTO;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.UpdateTransactionRequest;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.service.TransactionService;
@@ -13,8 +15,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -23,6 +29,7 @@ public class TransactionController {
 
     private final TransactionService service;
     private final UserRepository userRepository;
+    private final RestTemplate restTemplate;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Transaction> createTransaction(@RequestBody CreateTransactionRequest request) {
@@ -116,5 +123,45 @@ public class TransactionController {
         return ResponseEntity.ok(service.getTransactionsByUser(user));
     }
 
+    @GetMapping("/{id}/view")
+    public ResponseEntity<TransactionViewDTO> getTransactionView(@PathVariable String id) {
+        Transaction transaction = service.getTransaction(id);
 
+        // Call product service
+        String productUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/product")
+                .toUriString();
+
+        ProductDTO[] allProducts = restTemplate.getForObject(productUrl, ProductDTO[].class);
+
+        Map<String, ProductDTO> productMap = new HashMap<>();
+        if (allProducts != null) {
+            for (ProductDTO p : allProducts) {
+                productMap.put(p.getProductId(), p);
+            }
+        }
+
+        TransactionViewDTO dto = new TransactionViewDTO();
+        dto.setTransactionId(transaction.getTransactionId());
+        dto.setCustomerId(transaction.getCustomerId());
+        dto.setStatus(transaction.getStatus().name());
+
+        List<TransactionViewDTO.TransactionItemDTO> itemDTOs = transaction.getItems().stream().map(item -> {
+            TransactionViewDTO.TransactionItemDTO itemDTO = new TransactionViewDTO.TransactionItemDTO();
+            itemDTO.setProductId(item.getProductId());
+            itemDTO.setQuantity(item.getQuantity());
+            ProductDTO product = productMap.get(item.getProductId());
+            if (product != null) {
+                itemDTO.setProductName(product.getProductName());
+                itemDTO.setProductPrice(product.getProductPrice());
+            } else {
+                itemDTO.setProductName("Unknown");
+                itemDTO.setProductPrice(0);
+            }
+            return itemDTO;
+        }).toList();
+
+        dto.setItems(itemDTOs);
+        return ResponseEntity.ok(dto);
+    }
 }
