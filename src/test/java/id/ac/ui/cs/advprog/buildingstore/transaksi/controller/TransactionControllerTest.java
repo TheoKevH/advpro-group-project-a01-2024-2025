@@ -221,4 +221,12 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].transactionId").value("trx-18"));
     }
+
+    @Test
+    void testGetTransactionById_shouldReturn404WhenNotFound() throws Exception {
+        when(service.getTransaction("non-existent")).thenReturn(null);
+
+        mockMvc.perform(get("/api/transactions/non-existent"))
+                .andExpect(status().isNotFound());
+    }
 }
