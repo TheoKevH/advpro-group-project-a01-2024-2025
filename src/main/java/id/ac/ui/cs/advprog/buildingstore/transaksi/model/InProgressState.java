@@ -6,11 +6,15 @@ public class InProgressState implements TransactionState {
     @Override
     public void moveToPayment(Transaction transaction) {
         transaction.setState(new AwaitingPaymentState());
+        transaction.setStatus(TransactionStatus.AWAITING_PAYMENT);
+
     }
 
     @Override
     public void cancel(Transaction transaction) {
+
         transaction.setState(new CancelledState());
+        transaction.setStatus(TransactionStatus.CANCELLED);
     }
 
     @Override
