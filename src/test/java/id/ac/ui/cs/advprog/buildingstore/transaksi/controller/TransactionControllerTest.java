@@ -229,4 +229,13 @@ class TransactionControllerTest {
         mockMvc.perform(get("/api/transactions/non-existent"))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void testMoveToPayment_shouldReturnBadRequestOnError() throws Exception {
+        when(service.moveToPayment(dummyId)).thenThrow(new IllegalStateException("Invalid state"));
+
+        mockMvc.perform(put("/api/transactions/" + dummyId + "/payment").with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Invalid state"));
+    }
 }
