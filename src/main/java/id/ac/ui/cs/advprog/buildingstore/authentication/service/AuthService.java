@@ -8,6 +8,7 @@ public interface AuthService {
     void register(RegisterRequest request);
     void changePassword(ChangePasswordRequest request, String username);
     void deleteUser(Long id);
+    User getUser(String username);
     List<User> getAllUsers();
 
 }

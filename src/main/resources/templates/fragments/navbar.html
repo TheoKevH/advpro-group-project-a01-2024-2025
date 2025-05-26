@@ -7,10 +7,16 @@
 
         <nav class="flex flex-col space-y-2 text-gray-700 font-medium text-sm">
 
-            <!-- DASHBOARD -->
-            <a th:href="@{/admin/dashboard}"
+            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}"
+               th:href="@{/admin/dashboard}"
                class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition">
                 Admin Dashboard
+            </a>
+
+            <a th:if="${#authorization.expression('hasRole(''CASHIER'')')}"
+               th:href="@{/cashier/dashboard}"
+               class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition">
+                Cashier Dashboard
             </a>
 
             <!-- ADMIN ONLY -->
@@ -19,7 +25,7 @@
                 Manage Users
             </a>
 
-            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/products}"
+            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/product}"
                class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition">
                 Products
             </a>
@@ -30,9 +36,9 @@
             </a>
 
             <!-- ADMIN & CASHIER -->
-            <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''CASHIER'')')}" th:href="@{/sales}"
+            <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''CASHIER'')')}" th:href="@{/transaksi}"
                class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition">
-                Sales
+                Transactions
             </a>
 
             <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''CASHIER'')')}" th:href="@{/customers}"

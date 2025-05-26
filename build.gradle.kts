@@ -50,7 +50,7 @@ tasks.withType<Test> {
 }
 
 tasks.jacocoTestReport {
-    dependsOn(tasks.named("test"))
+    dependsOn(tasks.test)
     reports {
         xml.required.set(true)
         html.required.set(true)

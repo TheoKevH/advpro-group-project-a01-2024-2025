@@ -1,90 +1,146 @@
 package id.ac.ui.cs.advprog.buildingstore.product.controller;
 
+import id.ac.ui.cs.advprog.buildingstore.product.dto.ProductDTO;
+import id.ac.ui.cs.advprog.buildingstore.product.dto.ProductRequestDTO;
+import id.ac.ui.cs.advprog.buildingstore.product.factory.ProductFactory;
 import id.ac.ui.cs.advprog.buildingstore.product.model.Product;
 import id.ac.ui.cs.advprog.buildingstore.product.service.ProductService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.*;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Arrays;
+import java.math.BigDecimal;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
-public class ProductRestControllerTest {
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+class ProductRestControllerTest {
+
+    @InjectMocks
+    private ProductRestController controller;
 
     @Mock
     private ProductService service;
 
-    @InjectMocks
-    private ProductRestController productController;
+    private MockMvc mockMvc;
 
-    private Product product;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
-    void setUp() {
-        product = new Product();
-        product.setProductId("123");
-        product.setProductName("Test Product");
-        product.setProductQuantity(10);
+    void setup() {
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        objectMapper = new ObjectMapper();
     }
 
     @Test
-    void testCreateProduct() {
-        when(service.create(any(Product.class))).thenReturn(product);
+    void createProduct_shouldReturnCreatedProductDTO() throws Exception {
+        ProductDTO dto = new ProductDTO();
+        dto.setProductName("Test");
+        dto.setProductQuantity(5);
+        dto.setProductPrice(BigDecimal.TEN);
 
-        Product result = productController.createProduct(product);
-        assertEquals("123", result.getProductId());
-        assertEquals("Test Product", result.getProductName());
-        verify(service).create(product);
+        Product product = ProductFactory.fromDTO(dto);
+
+        when(service.create(any())).thenReturn(product);
+
+        mockMvc.perform(post("/api/product")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productName").value("Test"))
+                .andExpect(jsonPath("$.productQuantity").value(5));
+
+        verify(service).create(any());
     }
 
     @Test
-    void testGetAllProducts() {
-        List<Product> productList = Arrays.asList(product);
-        when(service.findAll()).thenReturn(productList);
+    void getAllProducts_shouldReturnFilteredProducts() throws Exception {
+        Product p1 = Product.builder()
+                .productName("Prod 1")
+                .productPrice(BigDecimal.valueOf(10))
+                .build();
+        Product p2 = Product.builder()
+                .productName("Prod 2")
+                .productPrice(BigDecimal.ZERO)  // Should be filtered out
+                .build();
 
-        List<Product> result = productController.getAllProducts();
-        assertEquals(1, result.size());
-        assertEquals("123", result.get(0).getProductId());
+        when(service.findAll()).thenReturn(List.of(p1, p2));
+
+        mockMvc.perform(get("/api/product"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].productName").value("Prod 1"))
+                .andExpect(jsonPath("$[1]").doesNotExist());
+
         verify(service).findAll();
     }
 
     @Test
-    void testGetProductById() {
-        when(service.findById("123")).thenReturn(product);
+    void updateProductQuantity_shouldUpdateAndReturnProductDTO() throws Exception {
+        String id = "123";
+        Integer quantity = 10;
 
-        Product result = productController.getProductById("123");
-        assertNotNull(result);
-        assertEquals("Test Product", result.getProductName());
-        verify(service).findById("123");
+        Product existing = Product.builder()
+                .productId(id)
+                .productQuantity(5)
+                .build();
+
+        Product updated = Product.builder()
+                .productId(id)
+                .productQuantity(quantity)
+                .build();
+
+        when(service.findById(id)).thenReturn(existing);
+        when(service.edit(any())).thenReturn(updated);
+
+        mockMvc.perform(put("/api/product/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(quantity)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productQuantity").value(quantity));
+
+        verify(service).findById(id);
+        verify(service).edit(any());
     }
 
     @Test
-    void testUpdateProduct() {
-        when(service.edit(any(Product.class))).thenReturn(product);
+    void deleteProduct_shouldReturnOk() throws Exception {
+        String id = "123";
 
-        Product updated = new Product();
-        updated.setProductName("Updated Product");
-        updated.setProductQuantity(20);
+        doNothing().when(service).delete(id);
 
-        Product result = productController.updateProduct("123", updated);
-        assertEquals("123", result.getProductId());
-        verify(service).edit(updated);
+        mockMvc.perform(delete("/api/product/{id}", id))
+                .andExpect(status().isOk());
+
+        verify(service).delete(id);
     }
 
     @Test
-    void testDeleteProduct() {
-        when(service.findById("123")).thenReturn(product);
-        doNothing().when(service).delete(product);
+    void insertProduct_shouldCallInsert() throws Exception {
+        ProductRequestDTO request = new ProductRequestDTO();
+        request.setProductName("InsertProd");
+        request.setProductQuantity(7);
 
-        assertDoesNotThrow(() -> productController.deleteProduct("123"));
-        verify(service).findById("123");
-        verify(service).delete(product);
+        Product dummyProduct = new Product();
+        dummyProduct.setProductId("some-id");
+        dummyProduct.setProductName(request.getProductName());
+        dummyProduct.setProductQuantity(request.getProductQuantity());
+
+        when(service.insert(any(ProductRequestDTO.class))).thenReturn(dummyProduct);
+
+        mockMvc.perform(post("/api/product/insert")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+
+        verify(service).insert(any(ProductRequestDTO.class));
     }
 }

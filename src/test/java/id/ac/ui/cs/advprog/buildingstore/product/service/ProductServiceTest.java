@@ -1,86 +1,152 @@
 package id.ac.ui.cs.advprog.buildingstore.product.service;
 
+import id.ac.ui.cs.advprog.buildingstore.product.dto.ProductDTO;
+import id.ac.ui.cs.advprog.buildingstore.product.dto.ProductRequestDTO;
+import id.ac.ui.cs.advprog.buildingstore.product.factory.ProductFactory;
 import id.ac.ui.cs.advprog.buildingstore.product.model.Product;
 import id.ac.ui.cs.advprog.buildingstore.product.repository.ProductRepository;
-import id.ac.ui.cs.advprog.buildingstore.product.service.ProductServiceImplement;
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.ui.Model;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ProductServiceTest {
+class ProductServiceImplementTest {
 
-    @Mock
-    private Model model;
     @Mock
     private ProductRepository productRepository;
+
     @InjectMocks
-    ProductServiceImplement productService;
+    private ProductServiceImplement productService;
+
+    private Product sampleProduct;
+
     @BeforeEach
     void setUp() {
+        sampleProduct = Product.builder()
+                .productId("1")
+                .productName("Kayu")
+                .productDescription("Kayu kuat")
+                .productPrice(BigDecimal.valueOf(10000))
+                .productQuantity(10)
+                .build();
     }
 
     @Test
-    public void testCreate() {
-        Product product = new Product();
-        when(productRepository.create(product)).thenReturn(product);
+    void create_shouldSaveNewProduct() {
+        ProductDTO dto = ProductFactory.toDTO(sampleProduct);
+        when(productRepository.findByProductNameIgnoreCase("Kayu")).thenReturn(Optional.empty());
+        when(productRepository.save(any())).thenReturn(sampleProduct);
 
-        Product createdProduct = productService.create(product);
-        verify(productRepository).create(product);
-        assertEquals(product, createdProduct);
+        Product created = productService.create(dto);
+
+        assertThat(created.getProductName()).isEqualTo("Kayu");
+        verify(productRepository).save(any());
     }
 
     @Test
-    public void testFindAll() {
-        Product product1 = new Product();
-        Product product2 = new Product();
-        List<Product> productList = Arrays.asList(product1, product2);
-        Iterator<Product> iterator = productList.iterator();
+    void create_shouldThrowIfProductNameExists() {
+        ProductDTO dto = ProductFactory.toDTO(sampleProduct);
+        when(productRepository.findByProductNameIgnoreCase("Kayu")).thenReturn(Optional.of(sampleProduct));
 
-        when(productRepository.findAll()).thenReturn(iterator);
-
-        List<Product> result = productService.findAll();
-        assertEquals(2, result.size());
-        assertTrue(result.contains(product1));
-        assertTrue(result.contains(product2));
+        assertThatThrownBy(() -> productService.create(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("sudah ada");
     }
 
     @Test
-    public void testFindById() {
-        Product product = new Product();
-        when(productRepository.findById("1")).thenReturn(product);
+    void findAll_shouldReturnProductList() {
+        when(productRepository.findAll()).thenReturn(List.of(sampleProduct));
 
-        Product foundProduct = productService.findById("1");
-        verify(productRepository).findById("1");
-        assertEquals(product, foundProduct);
+        List<Product> products = productService.findAll();
+
+        assertThat(products).hasSize(1);
     }
 
     @Test
-    public void testEdit() {
-        Product product = new Product();
-        when(productRepository.edit(product)).thenReturn(product);
+    void findById_shouldReturnProduct() {
+        when(productRepository.findById("1")).thenReturn(Optional.of(sampleProduct));
 
-        Product editedProduct = productService.edit(product);
-        verify(productRepository).edit(product);
-        assertEquals(product, editedProduct);
+        Product found = productService.findById("1");
+
+        assertThat(found.getProductName()).isEqualTo("Kayu");
     }
 
     @Test
-    public void testDelete() {
-        Product product = new Product();
-        doNothing().when(productRepository).delete(product);
+    void findById_shouldThrowIfNotFound() {
+        when(productRepository.findById("99")).thenReturn(Optional.empty());
 
-        productService.delete(product);
-        verify(productRepository).delete(product);
+        assertThatThrownBy(() -> productService.findById("99"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("tidak ditemukan");
+    }
+
+    @Test
+    void edit_shouldUpdateProduct() {
+        ProductDTO dto = ProductFactory.toDTO(sampleProduct);
+        dto.setProductQuantity(20);
+
+        when(productRepository.findById("1")).thenReturn(Optional.of(sampleProduct));
+        when(productRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Product updated = productService.edit(dto);
+
+        assertThat(updated.getProductQuantity()).isEqualTo(20);
+    }
+
+    @Test
+    void delete_shouldRemoveProduct() {
+        when(productRepository.existsById("1")).thenReturn(true);
+
+        productService.delete("1");
+
+        verify(productRepository).deleteById("1");
+    }
+
+    @Test
+    void delete_shouldThrowIfNotFound() {
+        when(productRepository.existsById("404")).thenReturn(false);
+
+        assertThatThrownBy(() -> productService.delete("404"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("tidak ditemukan");
+    }
+
+    @Test
+    void insert_shouldAddQuantityIfProductExists() {
+        ProductRequestDTO request = new ProductRequestDTO();
+        request.setProductName("Kayu");
+        request.setProductQuantity(5);
+
+        when(productRepository.findByProductNameIgnoreCase("Kayu")).thenReturn(Optional.of(sampleProduct));
+        when(productRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Product result = productService.insert(request);
+
+        assertThat(result.getProductQuantity()).isEqualTo(15);
+    }
+
+    @Test
+    void insert_shouldCreateNewProductIfNotExists() {
+        ProductRequestDTO request = new ProductRequestDTO();
+        request.setProductName("Besi");
+        request.setProductQuantity(10);
+
+        when(productRepository.findByProductNameIgnoreCase("Besi")).thenReturn(Optional.empty());
+        when(productRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Product result = productService.insert(request);
+
+        assertThat(result.getProductName()).isEqualTo("Besi");
+        assertThat(result.getProductQuantity()).isEqualTo(10);
+        assertThat(result.getProductPrice()).isEqualTo(BigDecimal.ZERO);
     }
 }

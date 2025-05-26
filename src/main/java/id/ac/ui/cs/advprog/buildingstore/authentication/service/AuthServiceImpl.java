@@ -62,6 +62,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public User getUser(String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        return user.orElse(null);
+    }
+
+    @Override
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }

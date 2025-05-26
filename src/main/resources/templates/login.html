@@ -3,30 +3,69 @@
 <head>
     <title>Login Page</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 flex items-center justify-center min-h-screen px-4">
-<div class="bg-white rounded-3xl shadow-xl max-w-md w-full p-10">
-    <h2 class="text-2xl font-bold text-gray-900 mb-8 text-center">Login</h2>
+    <style>
+        @keyframes auroraFlow {
+            0% {
+                /* Initial positions and sizes for 4 layers */
+                background-position: 0% 50%, 10% 40%, 20% 30%, 0% 0%;
+                background-size: 600% 600%, 550% 550%, 500% 500%, 250% 250%;
+            }
+            50% {
+                /* Mid-animation positions and sizes */
+                background-position: 100% 60%, 80% 55%, 65% 70%, 25% 25%;
+                background-size: 500% 500%, 600% 600%, 650% 650%, 300% 300%;
+            }
+            100% {
+                /* Return to initial state for smooth loop */
+                background-position: 0% 50%, 10% 40%, 20% 30%, 0% 0%;
+                background-size: 600% 600%, 550% 550%, 500% 500%, 250% 250%;
+            }
+        }
 
-    <form th:action="@{/login}" method="post" class="space-y-6">
+        .aurora-background {
+            background-image:
+
+                    radial-gradient(ellipse at top left, rgba(7, 192, 234, 0.65) 0%, rgba(13, 44, 74, 0) 50%),
+
+                    radial-gradient(ellipse at bottom right, rgba(201, 58, 255, 0.55) 0%, rgba(8, 27, 46, 0) 50%),
+
+                    radial-gradient(ellipse at center, rgba(0, 35, 96, 0.45) 0%, rgba(10, 30, 50, 0) 55%),
+
+                    linear-gradient(315deg, #02284c 20%, #0c6388 50%, #036370 90%);
+
+
+            background-size: 600% 600%, 550% 550%, 500% 500%, 250% 250%;
+            background-position: 0% 50%, 10% 40%, 20% 30%, 0% 0%;
+
+            animation: auroraFlow 15s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="aurora-background flex items-center justify-center min-h-screen px-4 font-sans">
+<div class="bg-slate-200/25 backdrop-blur-2xl rounded-3xl shadow-2xl max-w-md w-full p-10 border-2 border-white/40">
+    <h2 class="text-3xl font-bold text-sky-50 mb-1 text-center">Welcome Back!</h2>
+
+    <form th:action="@{/login}" method="post" class="space-y-7">
         <div>
-            <label class="block mb-1 font-medium text-gray-700">Username:</label>
+            <label for="username" class="block mb-2 text-md font-medium text-sky-100">Username</label>
             <input
                     type="text"
+                    id="username"
                     name="username"
                     required
-                    class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    class="w-full rounded-xl border border-sky-300/40 bg-white/15 px-4 py-3 text-sky-50 placeholder-sky-200/70 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300 transition duration-300"
                     placeholder="Enter your username"
             />
         </div>
 
         <div>
-            <label class="block mb-1 font-medium text-gray-700">Password:</label>
+            <label for="password" class="block mb-2 text-md font-medium text-sky-100">Password</label>
             <input
                     type="password"
+                    id="password"
                     name="password"
                     required
-                    class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    class="w-full rounded-xl border border-sky-300/40 bg-white/15 px-4 py-3 text-sky-50 placeholder-sky-200/70 focus:outline-none focus:ring-2 focus:ring-sky-300 focus:border-sky-300 transition duration-300"
                     placeholder="Enter your password"
             />
         </div>
@@ -35,16 +74,16 @@
             <input
                     type="submit"
                     value="Login"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl cursor-pointer transition"
+                    class="w-full bg-sky-500 hover:bg-sky-600 active:bg-sky-700 text-white font-semibold py-3 rounded-xl cursor-pointer transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-slate-900/50"
             />
         </div>
 
-        <div th:if="${param.error}" class="text-red-600 text-sm font-semibold mt-2">
-            <p>Invalid username or password</p>
+        <div th:if="${param.error}" class="text-red-300 bg-red-700/30 border border-red-400/50 p-3 rounded-lg text-sm font-medium text-center mt-2">
+            <p>Invalid username or password. Please try again.</p>
         </div>
 
-        <div th:if="${param.logout}" class="text-green-600 text-sm font-semibold mt-2">
-            <p>You have been logged out</p>
+        <div th:if="${param.logout}" class="text-green-300 bg-green-700/30 border border-green-400/50 p-3 rounded-lg text-sm font-medium text-center mt-2">
+            <p>You have been successfully logged out.</p>
         </div>
     </form>
 </div>
