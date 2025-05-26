@@ -41,7 +41,7 @@
             <tr th:each="trx : ${transactions}" th:attr="id=|trx_${trx.transactionId}|" class="border-t hover:bg-gray-50">
                 <td class="px-4 py-2" th:text="${trx.transactionId}">TRX-001</td>
                 <td class="px-4 py-2" th:text="${customerMap[trx.customerId]} ?: 'Unknown Customer'">Customer</td>
-                <td class="px-4 py-2 font-semibold" th:text="${trx.status}">IN_PROGRESS</td>
+                <td class="px-4 py-2 font-semibold" th:text="${#strings.replace(trx.status.name(), '_', ' ')}">IN_PROGRESS</td>
                 <td class="px-4 py-2" th:text="${#lists.size(trx.items)}">3</td>
                 <td class="px-4 py-2 space-x-2">
                     <!-- Pay Button (only when status is IN_PROGRESS) -->
