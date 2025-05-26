@@ -201,6 +201,23 @@ class TransactionServiceTest {
         assertEquals("trx-1", result.get(0).getTransactionId());
     }
 
+    @Test
+    void testMarkAsPaid_shouldUpdateStatusToCompleted() {
+        Transaction trx = Transaction.builder()
+                .customerId("cust-001")
+                .items(List.of(new TransactionItem("prod-1", 1)))
+                .build();
+        trx.moveToPayment();
+
+        when(repository.findById(trx.getTransactionId())).thenReturn(trx);
+        when(repository.save(any(Transaction.class))).thenReturn(trx);
+
+        Transaction result = service.markAsPaid(trx.getTransactionId());
+
+        assertEquals(TransactionStatus.COMPLETED, result.getStatus());
+    }
+
+
     @AfterEach
     void clearSecurityContext() {
         SecurityContextHolder.clearContext();
