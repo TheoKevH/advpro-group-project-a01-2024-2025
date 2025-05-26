@@ -57,3 +57,8 @@ tasks.jacocoTestReport {
     }
 }
 
+tasks.withType<Jar> {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+

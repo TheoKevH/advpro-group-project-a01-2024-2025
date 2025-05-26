@@ -48,13 +48,6 @@ public class TransactionServiceImpl implements TransactionService {
 
         for (TransactionItem item : items) {
             item.setTransaction(transaction); // semoga bisaaa woiiii!!!!
-
-            String updateUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/api/product/{id}")
-                    .buildAndExpand(item.getProductId())
-                    .toUriString();
-
-            restTemplate.put(updateUrl, item.getQuantity());
         }
 
         System.out.println("Creating transaction for customer: " + customerId);
