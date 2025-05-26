@@ -231,6 +231,24 @@ class TransactionServiceTest {
         assertEquals(TransactionStatus.CANCELLED, trx.getStatus());
     }
 
+    @Test
+    void testUpdateTransaction_shouldThrowIfNotEditable() {
+        Transaction trx = Transaction.builder()
+                .transactionId("trx-xx")
+                .items(List.of(new TransactionItem("prod-1", 2)))
+                .build();
+        trx.moveToPayment();  // not editable
+
+        when(repository.findById("trx-xx")).thenReturn(trx);
+
+        List<TransactionItem> updated = List.of(new TransactionItem("prod-2", 1));
+
+        assertThrows(IllegalStateException.class, () -> {
+            service.updateTransaction("trx-xx", updated);
+        });
+    }
+
+
 
 
     @AfterEach
