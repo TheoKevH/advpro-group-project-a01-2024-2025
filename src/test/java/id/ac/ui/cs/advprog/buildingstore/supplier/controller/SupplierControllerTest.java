@@ -9,6 +9,8 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -40,14 +42,19 @@ class SupplierControllerTest {
                 Supplier.builder().id(2L).name("Supplier B").build()
         );
 
-        Mockito.when(supplierService.getAllSuppliers()).thenReturn(mockSuppliers);
+        Page<Supplier> mockPage = new PageImpl<>(mockSuppliers);
 
-        mockMvc.perform(get("/supplier"))
+        Mockito.when(supplierService.getAllSuppliers(Mockito.any())).thenReturn(mockPage);
+
+        mockMvc.perform(get("/supplier?page=0"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("supplier/supplier_list"))
                 .andExpect(model().attributeExists("suppliers"))
-                .andExpect(model().attribute("suppliers", mockSuppliers));
+                .andExpect(model().attribute("suppliers", mockSuppliers))
+                .andExpect(model().attribute("currentPage", 0))
+                .andExpect(model().attribute("totalPages", mockPage.getTotalPages()));
     }
+
 
     @Test
     @WithMockUser
