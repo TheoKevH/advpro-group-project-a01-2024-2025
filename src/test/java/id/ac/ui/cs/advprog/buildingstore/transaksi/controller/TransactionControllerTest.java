@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -262,5 +263,15 @@ class TransactionControllerTest {
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Not editable"));
+    }
+
+    @Test
+    void testCancelTransaction_shouldReturnBadRequestOnError() throws Exception {
+        doThrow(new IllegalStateException("Already paid"))
+                .when(service).cancelTransaction(dummyId);
+
+        mockMvc.perform(delete("/api/transactions/" + dummyId).with(csrf()))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Already paid"));
     }
 }
