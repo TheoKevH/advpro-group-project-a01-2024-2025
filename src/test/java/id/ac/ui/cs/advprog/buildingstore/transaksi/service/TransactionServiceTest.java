@@ -261,7 +261,19 @@ class TransactionServiceTest {
         assertEquals("abc123", result.getTransactionId());
     }
 
+    @Test
+    void testGetAllTransactions_shouldReturnAll() {
+        List<Transaction> all = List.of(
+                Transaction.builder().transactionId("a").build(),
+                Transaction.builder().transactionId("b").build()
+        );
 
+        when(repository.findAll()).thenReturn(all);
+
+        List<Transaction> result = service.getAllTransactions();
+
+        assertEquals(2, result.size());
+    }
 
     @AfterEach
     void clearSecurityContext() {
