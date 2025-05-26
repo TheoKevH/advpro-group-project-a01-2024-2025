@@ -154,7 +154,12 @@ class TransactionServiceTest {
                 .customerId("cust-999")
                 .build();
 
-        when(repository.findAll()).thenReturn(List.of(trx1, trx2));
+        Transaction trx3 = Transaction.builder()
+                .transactionId("trx-3")
+                .customerId(null)
+                .build();
+
+        when(repository.findAll()).thenReturn(List.of(trx1, trx2, trx3));
 
         List<Transaction> result = service.getTransactionsByCustomer("cust-123");
 
