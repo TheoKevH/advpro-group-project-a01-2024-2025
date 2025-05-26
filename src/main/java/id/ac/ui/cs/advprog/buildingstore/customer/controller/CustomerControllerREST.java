@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/customers")
 @CrossOrigin(origins = "*")
-public class CustomerController {
+public class CustomerControllerREST {
     @Autowired
     private CustomerService customerService;
 
@@ -58,6 +58,13 @@ public class CustomerController {
     @PostMapping
     public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
         try {
+            if (customerService.existsByEmail(customer.getEmail())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
+            if (customerService.existsByPhone(customer.getPhone())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
+
             Customer savedCustomer = customerService.addCustomer(customer);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedCustomer);
         } catch (Exception e) {
@@ -69,6 +76,13 @@ public class CustomerController {
     @PutMapping("/{id}")
     public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
         try {
+            if (customerService.existsByEmail(customer.getEmail())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
+            if (customerService.existsByPhone(customer.getPhone())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
+
             customer.setId(id);
             Customer updatedCustomer = customerService.updateCustomer(customer);
             return ResponseEntity.ok(updatedCustomer);

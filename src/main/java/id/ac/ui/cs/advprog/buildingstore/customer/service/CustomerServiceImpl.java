@@ -23,8 +23,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Customer addCustomer(Customer customer) {
-        Customer savedCustomer = customerRepository.save(customer);
-        return savedCustomer;
+        return customerRepository.save(customer);
     }
 
     @Override
@@ -38,11 +37,6 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Customer getCustomerByUser(User user) {
-        return customerRepository.findByUser(user).orElse(null);
-    }
-
-    @Override
     public Customer updateCustomer(Customer customer) {
         if (customer.getId() == null || !customerRepository.existsById(customer.getId())) {
             throw new IllegalArgumentException("Customer not found or ID is null");
@@ -53,5 +47,27 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void deleteCustomer(Long id) {
         customerRepository.deleteById(id);
+    }
+
+    // Methods for duplicate checking
+    @Override
+    public boolean existsByEmail(String email) {
+        return customerRepository.existsByEmail(email);
+    }
+
+    @Override
+    public boolean existsByPhone(String phone) {
+        return customerRepository.existsByPhone(phone);
+    }
+
+    // Methods for update operations (checking duplicates excluding current customer)
+    @Override
+    public boolean existsByEmailAndIdNot(String email, Long id) {
+        return customerRepository.existsByEmailAndIdNot(email, id);
+    }
+
+    @Override
+    public boolean existsByPhoneAndIdNot(String phone, Long id) {
+        return customerRepository.existsByPhoneAndIdNot(phone, id);
     }
 }

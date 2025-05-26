@@ -22,14 +22,14 @@
             <div>
               <h1 class="text-2xl font-bold text-gray-900">My Customer Account</h1>
               <p class="text-sm text-gray-600 mt-1">
-                Viewing customer: <span th:text="${customer.name} + ' (' + ${customer.user.username} + ')'" class="font-medium"></span>
+                Viewing customer: <span th:text="${customer.name}" class="font-medium"></span>
               </p>
             </div>
             <div class="flex gap-2">
-              <a th:href="@{/admin/customers/edit/{id}(id=${customer.id})}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center gap-2">
+              <a th:href="@{/customers/edit/{id}(id=${customer.id})}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center gap-2">
                 Edit
               </a>
-              <form th:action="@{/admin/customers/delete/{id}(id=${customer.id})}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete your customer account? This action cannot be undone.')">
+              <form th:action="@{/customers/delete/{id}(id=${customer.id})}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete your customer account? This action cannot be undone.')">
                 <input type="hidden" name="_method" value="delete">
                 <input type="hidden" name="_token" th:value="${_csrf.token}"/>
                 <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200 flex items-center gap-2">
@@ -44,12 +44,6 @@
           <div>
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
             <div class="space-y-4">
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <div class="text-sm text-gray-600">Customer Username</div>
-                <div class="text-lg font-semibold text-red-900" th:text="${customer.user.username}">
-                  username
-                </div>
-              </div>
               <div class="bg-gray-50 p-4 rounded-lg">
                 <div class="text-sm text-gray-600">Customer ID</div>
                 <div class="text-lg font-semibold text-red-900" th:text="${customer.id}">
@@ -69,11 +63,8 @@
                 </div>
               </div>
               <div class="bg-gray-50 p-4 rounded-lg">
-                <div class="text-sm text-gray-600">Phone Numbers</div>
-                <div th:if="${!customer.phone.isEmpty()}">
-                  <span class="text-lg font-semibold text-gray-900" th:text="${customer.phone}">phone</span>
-                </div>
-                <div class="text-lg font-semibold text-gray-900" th:if="${customer.phone.isEmpty()}">
+                <div class="text-sm text-gray-600">Phone</div>
+                <div class="text-lg font-semibold text-gray-900" th:text="${customer.phone}">
                   phone
                 </div>
               </div>
