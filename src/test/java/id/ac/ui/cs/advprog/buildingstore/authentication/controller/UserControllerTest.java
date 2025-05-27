@@ -94,12 +94,10 @@ public class UserControllerTest {
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     public void deleteUser_ShouldRedirectToUserList() throws Exception {
-        mockMvc.perform(get("/admin/users/delete/1"))
+        mockMvc.perform(post("/admin/users/delete/1").with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/users"));
     }
-
-
 
 
 }
