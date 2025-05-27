@@ -22,11 +22,11 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/product/insert")
+                        .ignoringRequestMatchers("/api/product/**", "api/transactions/**")
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/register", "/css/**", "/js/**", "/actuator",
-                                "/actuator/prometheus", "/api/product/**", "/api/customers/**").permitAll()
+                                "/actuator/prometheus", "/api/product/**", "/api/customers/**", "/api/transactions/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/cashier/**").hasRole("CASHIER")
                         .anyRequest().authenticated()

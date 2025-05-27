@@ -1,7 +1,5 @@
 package id.ac.ui.cs.advprog.buildingstore.product.controller;
 
-import id.ac.ui.cs.advprog.buildingstore.product.dto.ProductDTO;
-import id.ac.ui.cs.advprog.buildingstore.product.factory.ProductFactory;
 import id.ac.ui.cs.advprog.buildingstore.product.model.Product;
 import id.ac.ui.cs.advprog.buildingstore.product.service.ProductService;
 
@@ -10,12 +8,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.ui.Model;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -27,9 +24,6 @@ class ProductControllerTest {
 
     @Mock
     private ProductService service;
-
-    @Mock
-    private Model model;
 
     private MockMvc mockMvc;
 
@@ -43,7 +37,7 @@ class ProductControllerTest {
     void createProductPage_shouldReturnCreateView() throws Exception {
         mockMvc.perform(get("/product/create"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("product/createProduct"))
+                .andExpect(view().name("product/CreateProduct"))
                 .andExpect(model().attributeExists("product"));
     }
 
@@ -51,9 +45,38 @@ class ProductControllerTest {
     void createProductPost_shouldCallServiceAndRedirect() throws Exception {
         mockMvc.perform(post("/product/create")
                         .param("productName", "Test Product")
-                        .param("productQuantity", "5"))
+                        .param("productQuantity", "5")
+                        .param("productPrice", "10000"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/product"));
+
+        verify(service).create(any());
+    }
+
+    @Test
+    void createProductPost_shouldReturnFormOnValidationError() throws Exception {
+        // Missing productName param to trigger validation error
+        mockMvc.perform(post("/product/create")
+                        .param("productQuantity", "5")
+                        .param("productPrice", "10000"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("product/CreateProduct"))
+                .andExpect(model().attributeHasFieldErrors("product", "productName"));
+
+        verify(service, never()).create(any());
+    }
+
+    @Test
+    void createProductPost_shouldReturnFormOnServiceException() throws Exception {
+        doThrow(new IllegalArgumentException("Nama harus berbeda")).when(service).create(any());
+
+        mockMvc.perform(post("/product/create")
+                        .param("productName", "DuplicateName")
+                        .param("productQuantity", "5")
+                        .param("productPrice", "10000"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("product/CreateProduct"))
+                .andExpect(model().attributeHasFieldErrorCode("product", "productName", "error.productName"));
 
         verify(service).create(any());
     }
@@ -67,7 +90,7 @@ class ProductControllerTest {
 
         mockMvc.perform(get("/product"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("product/productList"))
+                .andExpect(view().name("product/ProductList"))
                 .andExpect(model().attributeExists("products"));
 
         verify(service).findAll();
@@ -81,7 +104,7 @@ class ProductControllerTest {
 
         mockMvc.perform(get("/product/edit/{id}", id))
                 .andExpect(status().isOk())
-                .andExpect(view().name("product/editProduct"))
+                .andExpect(view().name("product/EditProduct"))
                 .andExpect(model().attributeExists("product"));
 
         verify(service).findById(id);
@@ -92,7 +115,8 @@ class ProductControllerTest {
         mockMvc.perform(post("/product/edit")
                         .param("productId", "id1")
                         .param("productName", "Updated")
-                        .param("productQuantity", "10"))
+                        .param("productQuantity", "10")
+                        .param("productPrice", "10000"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/product"));
 
@@ -100,8 +124,24 @@ class ProductControllerTest {
     }
 
     @Test
+    void editProductPost_shouldReturnFormOnValidationError() throws Exception {
+        // Missing productName param to trigger validation error
+        mockMvc.perform(post("/product/edit")
+                        .param("productId", "id1")
+                        .param("productQuantity", "10")
+                        .param("productPrice", "10000"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("product/EditProduct"))
+                .andExpect(model().attributeHasFieldErrors("product", "productName"));
+
+        verify(service, never()).edit(any());
+    }
+
+    @Test
     void deleteProduct_shouldCallServiceAndRedirect() throws Exception {
         String id = "deleteId";
+
+        doNothing().when(service).delete(id);
 
         mockMvc.perform(get("/product/delete/{id}", id))
                 .andExpect(status().is3xxRedirection())

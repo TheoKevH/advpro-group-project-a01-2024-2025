@@ -5,11 +5,13 @@ import id.ac.ui.cs.advprog.buildingstore.product.model.Product;
 import id.ac.ui.cs.advprog.buildingstore.product.service.ProductService;
 import id.ac.ui.cs.advprog.buildingstore.product.dto.ProductDTO;
 
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.BindingResult;
 
 import java.util.List;
 
@@ -24,13 +26,25 @@ public class ProductController {
     @GetMapping("/create")
     public String createProductPage(Model model) {
         model.addAttribute("product", new ProductDTO());
-        return "product/createProduct";
+        return "product/CreateProduct";
     }
 
     @PostMapping("/create")
-    public String createProductPost(@ModelAttribute ProductDTO productDTO) {
-        service.create(productDTO);
-        return "redirect:/product";
+    public String createProductPost(@Valid @ModelAttribute("product") ProductDTO productDTO,
+                                    BindingResult bindingResult,
+                                    Model model) {
+
+        if (bindingResult.hasErrors()) {
+            return "product/CreateProduct";
+        }
+
+        try {
+            service.create(productDTO);
+            return "redirect:/product";
+        } catch (IllegalArgumentException ex) {
+            bindingResult.rejectValue("productName", "error.productName", "Nama harus berbeda");
+            return "product/CreateProduct";
+        }
     }
 
     @GetMapping("")
@@ -40,18 +54,25 @@ public class ProductController {
                 .map(ProductFactory::toDTO)
                 .toList();
         model.addAttribute("products", productDTOs);
-        return "product/productList";
+        return "product/ProductList";
     }
 
     @GetMapping("/edit/{id}")
     public String editProductPage(@PathVariable String id, Model model) {
         Product product = service.findById(id);
         model.addAttribute("product", ProductFactory.toDTO(product));
-        return "product/editProduct";
+        return "product/EditProduct";
     }
 
     @PostMapping("/edit")
-    public String editProductPost(@ModelAttribute ProductDTO productDTO) {
+    public String editProductPost(@Valid @ModelAttribute("product") ProductDTO productDTO,
+                                  BindingResult bindingResult,
+                                  Model model) {
+
+        if (bindingResult.hasErrors()) {
+            return "product/EditProduct";
+        }
+
         service.edit(productDTO);
         return "redirect:/product";
     }

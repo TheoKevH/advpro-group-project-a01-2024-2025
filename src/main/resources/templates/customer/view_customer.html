@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Customer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+
+<!-- Sidebar -->
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<main class="flex-1 p-10 max-w-screen-xl mx-auto">
+  <h1 class="text-3xl font-bold mb-6 text-gray-900">Customer Account</h1>
+
+  <div class="min-h-screen">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="bg-white rounded-lg shadow-md">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900">My Customer Account</h1>
+              <p class="text-sm text-gray-600 mt-1">
+                Viewing customer: <span th:text="${customer.name}" class="font-medium"></span>
+              </p>
+            </div>
+            <div class="flex gap-2">
+              <a th:href="@{/customers/edit/{id}(id=${customer.id})}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center gap-2">
+                Edit
+              </a>
+              <form th:action="@{/customers/delete/{id}(id=${customer.id})}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete your customer account? This action cannot be undone.')">
+                <input type="hidden" name="_method" value="delete">
+                <input type="hidden" name="_token" th:value="${_csrf.token}"/>
+                <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200 flex items-center gap-2">
+                  Delete
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6">
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
+            <div class="space-y-4">
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="text-sm text-gray-600">Customer ID</div>
+                <div class="text-lg font-semibold text-red-900" th:text="${customer.id}">
+                  1
+                </div>
+              </div>
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="text-sm text-gray-600">Name</div>
+                <div class="text-lg font-semibold text-gray-900" th:text="${customer.name}">
+                  name
+                </div>
+              </div>
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="text-sm text-gray-600">Email</div>
+                <div class="text-lg font-semibold text-gray-900" th:text="${customer.email}">
+                  email
+                </div>
+              </div>
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="text-sm text-gray-600">Phone</div>
+                <div class="text-lg font-semibold text-gray-900" th:text="${customer.phone}">
+                  phone
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Add confirmation for delete actions
+  document.querySelectorAll('form[onsubmit*="confirm"]').forEach(form => {
+    form.addEventListener('submit', function(e) {
+      const customerEmail = this.getAttribute('data-customer-email') || 'this customer';
+      if (!confirm(`Are you sure you want to delete ${customerEmail}? This action cannot be undone.`)) {
+        e.preventDefault();
+      }
+    });
+  });
+</script>
+</body>
+</html>

@@ -46,10 +46,12 @@
                 Customers
             </a>
 
-            <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''CASHIER'')')}" th:href="@{/payments}"
+            <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''CASHIER'')')}"
+               href="#" onclick="location.reload(); return false;"
                class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition">
                 Payments
             </a>
+
 
             <!-- PROFILE -->
             <a th:href="@{/profile}"

@@ -14,6 +14,8 @@ import java.security.Principal;
 @Controller
 public class AuthController {
 
+    private static final String USERNAME_ATTR = "username";
+
     private final AuthService authService;
 
     public AuthController(AuthService authService) {
@@ -28,13 +30,13 @@ public class AuthController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/dashboard")
     public String adminDashboard(Model model, Principal principal) {
-        model.addAttribute("username", principal.getName());
+        model.addAttribute(USERNAME_ATTR, principal.getName());
         return "admin/dashboard";
     }
 
     @GetMapping("/cashier/dashboard")
     public String cashierDashboard(Model model, Principal principal) {
-        model.addAttribute("username", principal.getName());
+        model.addAttribute(USERNAME_ATTR, principal.getName());
         return "cashier/dashboard";
     }
 
@@ -50,7 +52,7 @@ public class AuthController {
                                  Principal principal,
                                  Model model) {
         if (result.hasErrors()) {
-            model.addAttribute("username", principal.getName());
+            model.addAttribute(USERNAME_ATTR, principal.getName());
             return "profile";
         }
 
@@ -64,7 +66,7 @@ public class AuthController {
 
     @GetMapping("/profile")
     public String profilePage(Model model, Principal principal) {
-        model.addAttribute("username", principal.getName());
+        model.addAttribute(USERNAME_ATTR, principal.getName());
         model.addAttribute("changePasswordRequest", new ChangePasswordRequest());
         return "profile";
     }

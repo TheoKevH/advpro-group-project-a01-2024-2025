@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Customer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+<div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+  <h1 class="text-2xl font-bold mb-6 text-gray-800 text-center">Edit Customer</h1>
+
+  <form th:action="@{/customers/edit}" th:object="${customer}" method="post" class="space-y-4" novalidate>
+    <!-- Display general error messages -->
+    <div th:if="${#fields.hasAnyErrors()}" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+      <ul class="list-disc list-inside text-sm">
+        <li th:if="${errorMessage}" th:text="${errorMessage}"></li>
+        <li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li>
+      </ul>
+    </div>
+
+    <input type="hidden" th:field="*{id}" />
+
+    <div>
+      <label for="name" class="block text-gray-700 font-medium mb-1">
+        Name <span class="text-red-500">*</span>
+      </label>
+      <input type="text"
+             th:field="*{name}"
+             id="name"
+             required
+             minlength="2"
+             maxlength="50"
+             pattern="^[a-zA-Z\s]+$"
+             title="Name must contain only letters and spaces, 2-50 characters"
+             th:class="${#fields.hasErrors('name')} ? 'w-full border-2 border-red-500 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500' : 'w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'" />
+
+      <!-- Server-side validation error for name -->
+      <div th:if="${#fields.hasErrors('name')}" class="mt-1 text-red-600 text-sm">
+        <span th:errors="*{name}"></span>
+      </div>
+
+      <!-- Client-side validation message -->
+      <div class="mt-1 text-red-600 text-sm hidden" id="name-error">
+        Name must contain only letters and spaces (2-50 characters)
+      </div>
+    </div>
+
+    <div>
+      <label for="email" class="block text-gray-700 font-medium mb-1">
+        Email <span class="text-red-500">*</span>
+      </label>
+      <input type="email"
+             th:field="*{email}"
+             id="email"
+             required
+             maxlength="100"
+             pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+             title="Please enter a valid email address"
+             th:class="${#fields.hasErrors('email')} ? 'w-full border-2 border-red-500 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500' : 'w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'" />
+
+      <!-- Server-side validation error for email -->
+      <div th:if="${#fields.hasErrors('email')}" class="mt-1 text-red-600 text-sm">
+        <span th:errors="*{email}"></span>
+      </div>
+
+      <!-- Client-side validation message -->
+      <div class="mt-1 text-red-600 text-sm hidden" id="email-error">
+        Please enter a valid email address
+      </div>
+    </div>
+
+    <div>
+      <label for="phone" class="block text-gray-700 font-medium mb-1">Phone</label>
+      <input type="tel"
+             th:field="*{phone}"
+             id="phone"
+             required
+             maxlength="20"
+             pattern="^08[0-9]{8,14}$"
+             title="Phone number format is 08XXXXXXXXXX (10-16 digits long)"
+             th:class="${#fields.hasErrors('phone')} ? 'w-full border-2 border-red-500 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500' : 'w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'" />
+
+      <!-- Server-side validation error for phone -->
+      <div th:if="${#fields.hasErrors('phone')}" class="mt-1 text-red-600 text-sm">
+        <span th:errors="*{phone}"></span>
+      </div>
+
+      <!-- Client-side validation message -->
+      <div class="mt-1 text-red-600 text-sm hidden" id="phone-error">
+        Phone number format is 08XXXXXXXXXX (10-16 digits long)
+      </div>
+    </div>
+
+    <div class="pt-4 space-y-3">
+      <button type="submit"
+              class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-200">
+        Edit Customer
+      </button>
+      <a th:href="@{/customers}"
+         class="block w-full text-center bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400 transition duration-200">
+        Back to Customer List
+      </a>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('phone');
+
+    const nameError = document.getElementById('name-error');
+    const emailError = document.getElementById('email-error');
+    const phoneError = document.getElementById('phone-error');
+
+    // Real-time validation functions
+    function validateName() {
+      const value = nameInput.value.trim();
+      const isValid = value.length >= 2 && value.length <= 50 && /^[a-zA-Z\s]+$/.test(value);
+
+      if (value && !isValid) {
+        nameInput.classList.add('border-red-500', 'border-2');
+        nameInput.classList.remove('border-gray-300');
+        nameError.classList.remove('hidden');
+      } else {
+        nameInput.classList.remove('border-red-500', 'border-2');
+        nameInput.classList.add('border-gray-300');
+        nameError.classList.add('hidden');
+      }
+      return isValid || !value;
+    }
+
+    function validateEmail() {
+      const value = emailInput.value.trim();
+      const isValid = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value);
+
+      if (value && !isValid) {
+        emailInput.classList.add('border-red-500', 'border-2');
+        emailInput.classList.remove('border-gray-300');
+        emailError.classList.remove('hidden');
+      } else {
+        emailInput.classList.remove('border-red-500', 'border-2');
+        emailInput.classList.add('border-gray-300');
+        emailError.classList.add('hidden');
+      }
+      return isValid || !value;
+    }
+
+    function validatePhone() {
+      const value = phoneInput.value.trim();
+      const isValid = !value || /^08[0-9]{8,14}$/.test(value);
+
+      if (value && !isValid) {
+        phoneInput.classList.add('border-red-500', 'border-2');
+        phoneInput.classList.remove('border-gray-300');
+        phoneError.classList.remove('hidden');
+      } else {
+        phoneInput.classList.remove('border-red-500', 'border-2');
+        phoneInput.classList.add('border-gray-300');
+        phoneError.classList.add('hidden');
+      }
+      return isValid;
+    }
+
+    // Add event listeners for real-time validation
+    nameInput.addEventListener('input', validateName);
+    nameInput.addEventListener('blur', validateName);
+
+    emailInput.addEventListener('input', validateEmail);
+    emailInput.addEventListener('blur', validateEmail);
+
+    phoneInput.addEventListener('input', validatePhone);
+    phoneInput.addEventListener('blur', validatePhone);
+
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+      const isNameValid = validateName();
+      const isEmailValid = validateEmail();
+      const isPhoneValid = validatePhone();
+
+      // Check required fields
+      const nameRequired = nameInput.value.trim().length > 0;
+      const emailRequired = emailInput.value.trim().length > 0;
+
+      if (!nameRequired) {
+        nameInput.classList.add('border-red-500', 'border-2');
+        nameInput.classList.remove('border-gray-300');
+      }
+
+      if (!emailRequired) {
+        emailInput.classList.add('border-red-500', 'border-2');
+        emailInput.classList.remove('border-gray-300');
+      }
+
+      if (!nameRequired || !emailRequired || !isNameValid || !isEmailValid || !isPhoneValid) {
+        e.preventDefault();
+
+        // Focus on first invalid field
+        if (!nameRequired || !isNameValid) {
+          nameInput.focus();
+        } else if (!emailRequired || !isEmailValid) {
+          emailInput.focus();
+        } else if (!isPhoneValid) {
+          phoneInput.focus();
+        }
+      }
+    });
+  });
+</script>
+</body>
+</html>

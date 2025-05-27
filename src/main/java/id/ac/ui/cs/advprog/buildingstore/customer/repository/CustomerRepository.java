@@ -2,62 +2,25 @@ package id.ac.ui.cs.advprog.buildingstore.customer.repository;
 
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.customer.model.Customer;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
 
-@Repository
-public class CustomerRepository {
-    // Mapping of Customer based id
-    private Map<String, Customer> customerMap = new ConcurrentHashMap<>();
-    // Mapping of Customer based user
-    private Map<Long, Customer> userMap = new ConcurrentHashMap<>();
+public interface CustomerRepository extends JpaRepository<Customer, Long> {
+    boolean existsByEmail(String email);
 
-    public Customer createCustomer(Customer customer) {
-        if (customerMap.containsKey(customer.getId())) {
-            return customerMap.get(customer.getId());
-        }
+    boolean existsByPhone(String phone);
 
-        customerMap.put(customer.getId(), customer);
-        userMap.put(customer.getUser().getId(), customer);
-        System.out.println("Customer created: " + customer.getId());
-        return customer;
-    }
+    boolean existsByName(String name);
 
-    public Iterator<Customer> getAllCustomers() {
-        return customerMap.values().iterator();
-    }
+    Optional<Customer> findByEmail(String email);
 
-    public Customer getCustomer(String id) {
-        if (customerMap.containsKey(id)) {
-            System.out.println("Customer found: " + id);
-            return customerMap.get(id);
-        }
-        System.out.println("Customer not found: " + id);
-        return null;
-    }
+    Optional<Customer> findByPhone(String phone);
 
-    public Customer getCustomerByUser(User user) {
-        if (userMap.containsKey(user.getId())) {
-            System.out.println("Customer found by user: " + user.getId());
-            return userMap.get(user.getId());
-        }
-        System.out.println("Customer not found by user: " + user.getId());
-        return null;
-    }
+    // For update operations - check duplicates excluding current customer
+    boolean existsByEmailAndIdNot(String email, Long id);
 
-    public Customer updateCustomer(Customer customer) {
-        customerMap.put(customer.getId(), customer);
-        userMap.put(customer.getUser().getId(), customer);
-        return customer;
-    }
+    boolean existsByPhoneAndIdNot(String phone, Long id);
 
-    public void removeCustomer(String customerId) {
-        Customer customer = customerMap.get(customerId);
-        customerMap.remove(customerId);
-        userMap.remove(customer.getUser().getId());
-    }
+    boolean existsByNameAndIdNot(String name, Long id);
 }

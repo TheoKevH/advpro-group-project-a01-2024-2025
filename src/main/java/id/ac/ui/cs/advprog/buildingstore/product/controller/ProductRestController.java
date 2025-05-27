@@ -22,8 +22,6 @@ public class ProductRestController {
     @Autowired
     private ProductService service;
 
-    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
-
     // Create product (POST /api/products)
     @PostMapping
     public ProductDTO createProduct(@RequestBody ProductDTO dto) {
@@ -35,7 +33,9 @@ public class ProductRestController {
     @GetMapping
     public List<ProductDTO> getAllProducts() {
         return service.findAll().stream()
-                .filter(product -> product.getProductPrice() != null && product.getProductPrice().compareTo(BigDecimal.ZERO) > 0)
+                .filter(product -> product.getProductPrice() != null &&
+                        product.getProductPrice().compareTo(BigDecimal.ZERO) > 0 &&
+                        product.getProductQuantity() > 0)
                 .map(ProductFactory::toDTO)
                 .toList();
     }

@@ -10,6 +10,9 @@ import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
 import java.util.List;
@@ -26,7 +29,12 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
+
     @Override
+    @Transactional
     public Transaction createTransaction(String customerId, List<TransactionItem> items) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User creator = userRepository.findByUsername(username)
@@ -38,12 +46,21 @@ public class TransactionServiceImpl implements TransactionService {
                 createdBy(creator).
                 build();
 
+        for (TransactionItem item : items) {
+            item.setTransaction(transaction); // semoga bisaaa woiiii!!!!
+        }
+
+        System.out.println("Creating transaction for customer: " + customerId);
+        System.out.println("Items: " + items.size());
+
+        transaction.setItems(items);
+
         return repository.save(transaction);
     }
 
     @Override
     public Transaction getTransaction(String id) {
-        return repository.findById(id);
+        return repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
     }
 
     @Override
@@ -53,7 +70,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction moveToPayment(String id) {
-        Transaction trx = repository.findById(id);
+        Transaction trx = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
         trx.moveToPayment();
         Transaction saved = repository.save(trx);
         asyncTransactionLogger.logTransactionStatus(saved);
@@ -62,7 +79,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction markAsPaid(String id) {
-        Transaction trx = repository.findById(id);
+        Transaction trx = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
         trx.markAsPaid();
         Transaction saved = repository.save(trx);
         asyncTransactionLogger.logTransactionStatus(saved);
@@ -71,7 +88,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public void cancelTransaction(String id) {
-        Transaction trx = repository.findById(id);
+        Transaction trx = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
         trx.cancel();
         repository.save(trx);
         asyncTransactionLogger.logTransactionStatus(trx);
@@ -79,7 +96,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction updateTransaction(String id, List<TransactionItem> items) {
-        Transaction trx = repository.findById(id);
+        Transaction trx = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
         if (!trx.isEditable()) {
             throw new IllegalStateException("Transaksi tidak bisa diedit karena sudah bukan IN_PROGRESS");
         }
