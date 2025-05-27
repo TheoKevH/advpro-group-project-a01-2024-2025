@@ -24,11 +24,11 @@
     <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
             <h3 class="font-semibold text-lg text-gray-800 mb-2">Total Transactions</h3>
-            <p class="text-2xl font-bold text-green-600">2</p>
+            <p id="totalTransactions" class="text-2xl font-bold text-green-600">2</p>
         </div>
         <div class="bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
             <h3 class="font-semibold text-lg text-gray-800 mb-2">Sales Today</h3>
-            <p class="text-2xl font-bold text-green-600">Rp50,011</p>
+            <p id="salesToday" class="text-2xl font-bold text-green-600">Rp50,011</p>
         </div>
         <div class="bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
             <h3 class="font-semibold text-lg text-gray-800 mb-2">Pending Payments</h3>
@@ -36,5 +36,53 @@
         </div>
     </section>
 </main>
+<script>
+    async function updateCashierDashboardFromTransactionsPage() {
+        try {
+            const response = await fetch("/transaksi");
+            const html = await response.text();
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+
+            const rows = doc.querySelectorAll("#transactionsTableBody tr");
+            let totalTransactions = 0;
+            let totalSales = 0;
+
+            for (const row of rows) {
+                const status = row.children[2]?.textContent?.trim();
+                const transactionId = row.children[0]?.textContent?.trim();
+
+                if (transactionId && status) {
+                    totalTransactions++;
+
+                    const viewBtn = row.querySelector("button[onclick^='openDetailModal']");
+                    if (viewBtn) {
+                        const trxIdMatch = viewBtn.getAttribute("onclick").match(/openDetailModal\('([^']+)'\)/);
+                        if (trxIdMatch) {
+                            const trxId = trxIdMatch[1];
+
+                            const trxRes = await fetch(`/api/transactions/${trxId}/view`);
+                            const trxData = await trxRes.json();
+
+                            trxData.items.forEach(item => {
+                                totalSales += item.quantity * item.productPrice;
+                            });
+                        }
+                    }
+                }
+            }
+
+            document.getElementById("totalTransactions").textContent = totalTransactions;
+            document.getElementById("salesToday").textContent = "Rp " + totalSales.toLocaleString("id-ID");
+
+        } catch (err) {
+            console.error("Failed to update dashboard:", err);
+        }
+    }
+
+    updateCashierDashboardFromTransactionsPage();
+</script>
+
 </body>
 </html>
