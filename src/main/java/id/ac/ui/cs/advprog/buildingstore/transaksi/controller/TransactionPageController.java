@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,6 @@ public class TransactionPageController {
     private final TransactionService transactionService;
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
-
 
     @GetMapping("/transaksi")
     public String cashierTransactions(Model model) {

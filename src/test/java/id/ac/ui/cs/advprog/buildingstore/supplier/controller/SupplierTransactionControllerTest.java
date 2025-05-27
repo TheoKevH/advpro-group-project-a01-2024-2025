@@ -86,9 +86,12 @@ class SupplierTransactionControllerTest {
         );
 
         assertThat(thrown)
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Failed to fetch transactions asynchronously")
                 .hasCauseInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Async failed");
+                .hasRootCauseMessage("Async failed");
     }
+
 
 
     @Test
