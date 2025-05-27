@@ -8,9 +8,6 @@ import id.ac.ui.cs.advprog.buildingstore.product.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -19,8 +16,6 @@ public class ProductServiceImplement implements ProductService {
 
     @Autowired
     private ProductRepository productRepository;
-
-    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
     @Override
     public Product create(ProductDTO dto) {
