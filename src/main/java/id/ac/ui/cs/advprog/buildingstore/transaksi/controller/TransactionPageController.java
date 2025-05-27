@@ -22,10 +22,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -38,8 +34,6 @@ public class TransactionPageController {
     private final TransactionService transactionService;
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
-    private static final Logger log = LoggerFactory.getLogger(ProductService.class);
-
 
     @GetMapping("/transaksi")
     public String cashierTransactions(Model model) {
