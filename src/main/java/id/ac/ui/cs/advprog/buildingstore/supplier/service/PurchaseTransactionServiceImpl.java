@@ -7,15 +7,16 @@ import id.ac.ui.cs.advprog.buildingstore.supplier.factory.PurchaseTransactionFac
 import id.ac.ui.cs.advprog.buildingstore.supplier.model.Supplier;
 import id.ac.ui.cs.advprog.buildingstore.supplier.repository.PurchaseTransactionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PurchaseTransactionServiceImpl implements PurchaseTransactionService {
@@ -28,6 +29,9 @@ public class PurchaseTransactionServiceImpl implements PurchaseTransactionServic
         PurchaseTransaction transaction = PurchaseTransactionFactory.fromDTO(dto);
         transactionRepo.save(transaction);
 
+        log.info("Saved transaction: supplierId={}, product={}, qty={}",
+                dto.getSupplier().getId(), dto.getProductName(), dto.getQuantity());
+
         ProductRequestDTO productRequest = new ProductRequestDTO();
         productRequest.setProductName(dto.getProductName());
         productRequest.setProductQuantity(dto.getQuantity());
@@ -35,18 +39,27 @@ public class PurchaseTransactionServiceImpl implements PurchaseTransactionServic
         String url = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/api/product/insert")
                 .toUriString();
-        restTemplate.postForEntity(url, productRequest, Void.class);
+
+        try {
+            restTemplate.postForEntity(url, productRequest, Void.class);
+            log.info("Synced product stock via POST to {} for product={}", url, dto.getProductName());
+        } catch (Exception e) {
+            log.warn("Failed to sync product stock for product={} due to {}", dto.getProductName(), e.getMessage());
+        }
     }
 
     @Override
     public List<PurchaseTransaction> getTransactionsBySupplier(Supplier supplier) {
-        return transactionRepo.findBySupplier(supplier);
+        List<PurchaseTransaction> list = transactionRepo.findBySupplier(supplier);
+        log.info("Fetched {} transactions for supplierId={}", list.size(), supplier.getId());
+        return list;
     }
 
     @Override
     @Async
     public CompletableFuture<List<PurchaseTransaction>> getTransactionsBySupplierAsync(Supplier supplier) {
         List<PurchaseTransaction> list = transactionRepo.findBySupplier(supplier);
+        log.info("Async fetch: {} transactions for supplierId={}", list.size(), supplier.getId());
         return CompletableFuture.completedFuture(list);
     }
 }
