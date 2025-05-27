@@ -2,8 +2,6 @@ package id.ac.ui.cs.advprog.buildingstore.transaksi.controller;
 
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepository;
-import id.ac.ui.cs.advprog.buildingstore.product.model.Product;
-import id.ac.ui.cs.advprog.buildingstore.product.service.ProductService;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CreateTransactionRequest;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CustomerDTO;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.ProductDTO;
@@ -22,7 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.Arrays;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,8 +93,6 @@ public class TransactionPageController {
 
     @PostMapping("/transaksi/create")
     public String createTransaction(@ModelAttribute CreateTransactionRequest request) {
-        System.out.println(">>> Customer ID: " + request.getCustomerId());
-        System.out.println(">>> Items: " + request.getItems());
         transactionService.createTransaction(request.getCustomerId(), request.getItems());
 
         for (TransactionItem item : request.getItems()) {
