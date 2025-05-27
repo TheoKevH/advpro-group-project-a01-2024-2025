@@ -5,6 +5,8 @@ import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepository;
 import id.ac.ui.cs.advprog.buildingstore.config.TestSecurityConfig;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CreateTransactionRequest;
+import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.CustomerDTO;
+import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.ProductDTO;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.dto.UpdateTransactionRequest;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.TransactionItem;
@@ -317,4 +319,78 @@ class TransactionControllerTest {
                         .with(user("admin01").roles("ADMIN")))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void testGetTransactionView_shouldReturnAggregatedData() throws Exception {
+        // Mock transaction
+        when(service.getTransaction(dummyId)).thenReturn(dummy);
+
+        // Mock product response
+        ProductDTO product = new ProductDTO();
+        product.setProductId("prod-1");
+        product.setProductName("Produk A");
+        product.setProductPrice(10000);
+        when(restTemplate.getForObject("http://localhost/api/product", ProductDTO[].class))
+                .thenReturn(new ProductDTO[]{ product });
+
+        // Mock customer response
+        CustomerDTO customer = new CustomerDTO();
+        customer.setId("cust-001");
+        customer.setName("John Doe");
+        when(restTemplate.getForObject("http://localhost/api/customers/cust-001", CustomerDTO.class))
+                .thenReturn(customer);
+
+        mockMvc.perform(get("/api/transactions/" + dummyId + "/view"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.customerName").value("John Doe"))
+                .andExpect(jsonPath("$.items.length()").value(1))
+                .andExpect(jsonPath("$.items[0].productName").value("Produk A"))
+                .andExpect(jsonPath("$.items[0].productPrice").value(10000))
+                .andExpect(jsonPath("$.items[0].quantity").value(2));
+    }
+
+    @Test
+    void testGetTransactionView_shouldHandleNullCustomer() throws Exception {
+        when(service.getTransaction(dummyId)).thenReturn(dummy);
+
+        ProductDTO product = new ProductDTO();
+        product.setProductId("prod-1");
+        product.setProductName("Produk A");
+        product.setProductPrice(10000);
+
+        when(restTemplate.getForObject("http://localhost/api/product", ProductDTO[].class))
+                .thenReturn(new ProductDTO[]{ product });
+
+        when(restTemplate.getForObject("http://localhost/api/customers/cust-001", CustomerDTO.class))
+                .thenReturn(null); // simulate not found
+
+        mockMvc.perform(get("/api/transactions/" + dummyId + "/view"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.customerName").value("Unknown"))
+                .andExpect(jsonPath("$.items[0].productName").value("Produk A"));
+    }
+
+    @Test
+    void testGetTransactionView_shouldHandleUnknownProduct() throws Exception {
+        when(service.getTransaction(dummyId)).thenReturn(dummy);
+
+        // Empty product list → no matching product in map
+        when(restTemplate.getForObject("http://localhost/api/product", ProductDTO[].class))
+                .thenReturn(new ProductDTO[0]);
+
+        CustomerDTO customer = new CustomerDTO();
+        customer.setId("cust-001");
+        customer.setName("John Doe");
+
+        when(restTemplate.getForObject("http://localhost/api/customers/cust-001", CustomerDTO.class))
+                .thenReturn(customer);
+
+        mockMvc.perform(get("/api/transactions/" + dummyId + "/view"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.customerName").value("John Doe"))
+                .andExpect(jsonPath("$.items[0].productName").value("Unknown"))
+                .andExpect(jsonPath("$.items[0].productPrice").value(0));
+    }
+
+
 }

@@ -61,7 +61,7 @@ class TransactionPageControllerTest {
 
         cashierUser = new User();
         cashierUser.setUsername("kasir");
-        cashierUser.setRole(Role.ADMIN);
+        cashierUser.setRole(Role.CASHIER);
 
         TransactionItem item = new TransactionItem();
         item.setProductId("p001");
