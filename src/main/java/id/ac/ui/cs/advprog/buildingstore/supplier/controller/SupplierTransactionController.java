@@ -34,6 +34,14 @@ public class SupplierTransactionController {
                     model.addAttribute("transactions", transactions);
                     log.info("Retrieved {} transactions for supplier id={}", transactions.size(), supplierId);
                     return "supplier/supplier_transactions";
+                })
+                .exceptionally(ex -> {
+                    Throwable cause = ex.getCause();
+                    if (cause instanceof InterruptedException) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException("Thread interrupted while fetching transactions", cause);
+                    }
+                    throw new RuntimeException("Failed to fetch transactions asynchronously", cause);
                 });
     }
 

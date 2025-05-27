@@ -21,6 +21,8 @@ import org.springframework.data.domain.Pageable;
 @RequiredArgsConstructor
 public class SupplierController {
 
+    private static final String REDIRECT_SUPPLIER = "redirect:/supplier";
+
     private final SupplierService supplierService;
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -55,7 +57,7 @@ public class SupplierController {
 
         supplierService.addSupplier(dto);
         log.info("Added supplier: {}", dto.getName());
-        return "redirect:/supplier";
+        return REDIRECT_SUPPLIER;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -83,7 +85,7 @@ public class SupplierController {
 
         supplierService.editSupplier(id, dto);
         log.info("Edited supplier id {} with new data: {}", id, dto.getName());
-        return "redirect:/supplier";
+        return REDIRECT_SUPPLIER;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -91,6 +93,6 @@ public class SupplierController {
     public String deleteSupplier(@PathVariable Long id) {
         supplierService.deleteSupplier(id);
         log.info("Deleted supplier id {}", id);
-        return "redirect:/supplier";
+        return REDIRECT_SUPPLIER;
     }
 }
