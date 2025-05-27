@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.buildingstore.transaksi.service;
 
+import id.ac.ui.cs.advprog.buildingstore.monitoring.TransactionMetrics;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.Transaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.model.TransactionItem;
 import id.ac.ui.cs.advprog.buildingstore.transaksi.repository.TransactionRepository;
@@ -7,12 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import id.ac.ui.cs.advprog.buildingstore.authentication.repository.UserRepository;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
 import java.util.List;
@@ -32,6 +31,10 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private TransactionMetrics transactionMetrics;
+
+
 
     @Override
     @Transactional
@@ -50,10 +53,9 @@ public class TransactionServiceImpl implements TransactionService {
             item.setTransaction(transaction); // semoga bisaaa woiiii!!!!
         }
 
-        System.out.println("Creating transaction for customer: " + customerId);
-        System.out.println("Items: " + items.size());
-
         transaction.setItems(items);
+
+        transactionMetrics.incrementTotal();
 
         return repository.save(transaction);
     }
@@ -82,6 +84,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction trx = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
         trx.markAsPaid();
         Transaction saved = repository.save(trx);
+        transactionMetrics.incrementCompleted();
         asyncTransactionLogger.logTransactionStatus(saved);
         return saved;
     }
