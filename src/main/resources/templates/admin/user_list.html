@@ -24,7 +24,7 @@
 
         <!-- Table -->
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+            <table id="userTable" class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-100 rounded-t-3xl">
                 <tr>
                     <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
@@ -45,11 +45,15 @@
                     <td class="px-6 py-4 whitespace-nowrap text-gray-700"
                         th:text="${user.role}">role</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <a th:href="@{|/admin/users/delete/${user.id}|}"
-                           onclick="return confirm('Yakin ingin menghapus user ini?')"
-                           class="inline-block bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition text-sm font-medium">
-                            Delete
-                        </a>
+                        <form th:action="@{|/admin/users/delete/${user.id}|}" method="post"
+                              th:object="${user}" class="inline">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button type="submit"
+                                    onclick="return confirm('Yakin ingin menghapus user ini?')"
+                                    class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition text-sm font-medium">
+                                Delete
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 </tbody>

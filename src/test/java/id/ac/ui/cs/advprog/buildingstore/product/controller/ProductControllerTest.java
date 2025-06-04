@@ -37,7 +37,7 @@ class ProductControllerTest {
     void createProductPage_shouldReturnCreateView() throws Exception {
         mockMvc.perform(get("/product/create"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("product/createProduct"))
+                .andExpect(view().name("product/CreateProduct"))
                 .andExpect(model().attributeExists("product"));
     }
 
@@ -60,7 +60,7 @@ class ProductControllerTest {
                         .param("productQuantity", "5")
                         .param("productPrice", "10000"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("product/createProduct"))
+                .andExpect(view().name("product/CreateProduct"))
                 .andExpect(model().attributeHasFieldErrors("product", "productName"));
 
         verify(service, never()).create(any());
@@ -75,7 +75,7 @@ class ProductControllerTest {
                         .param("productQuantity", "5")
                         .param("productPrice", "10000"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("product/createProduct"))
+                .andExpect(view().name("product/CreateProduct"))
                 .andExpect(model().attributeHasFieldErrorCode("product", "productName", "error.productName"));
 
         verify(service).create(any());
@@ -90,7 +90,7 @@ class ProductControllerTest {
 
         mockMvc.perform(get("/product"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("product/productList"))
+                .andExpect(view().name("product/ProductList"))
                 .andExpect(model().attributeExists("products"));
 
         verify(service).findAll();
@@ -104,7 +104,7 @@ class ProductControllerTest {
 
         mockMvc.perform(get("/product/edit/{id}", id))
                 .andExpect(status().isOk())
-                .andExpect(view().name("product/editProduct"))
+                .andExpect(view().name("product/EditProduct"))
                 .andExpect(model().attributeExists("product"));
 
         verify(service).findById(id);
@@ -131,7 +131,7 @@ class ProductControllerTest {
                         .param("productQuantity", "10")
                         .param("productPrice", "10000"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("product/editProduct"))
+                .andExpect(view().name("product/EditProduct"))
                 .andExpect(model().attributeHasFieldErrors("product", "productName"));
 
         verify(service, never()).edit(any());

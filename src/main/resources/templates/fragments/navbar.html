@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Navigation</title>
+</head>
 <body>
 <div th:fragment="navbar">
     <aside class="w-64 min-h-screen bg-white shadow-md p-6 flex flex-col rounded-tr-3xl rounded-br-3xl">
@@ -46,10 +50,15 @@
                 Customers
             </a>
 
-            <a th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''CASHIER'')')}" th:href="@{/payments}"
-               class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition">
-                Payments
-            </a>
+            <!-- Payments-->
+            <form th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''CASHIER'')')}"
+                  onsubmit="location.reload(); return false;"
+                  class="w-full">
+                <button type="submit"
+                        class="px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition w-full text-left">
+                    Payments
+                </button>
+            </form>
 
             <!-- PROFILE -->
             <a th:href="@{/profile}"

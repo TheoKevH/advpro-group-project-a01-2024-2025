@@ -10,6 +10,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -120,19 +125,22 @@ class SupplierServiceTest {
     }
 
     @Test
-    void getAllSuppliers_shouldReturnListOfSuppliers() {
+    void getAllSuppliers_shouldReturnPagedSuppliers() {
         List<Supplier> mockSuppliers = List.of(
                 Supplier.builder().id(1L).name("Supplier A").build(),
                 Supplier.builder().id(2L).name("Supplier B").build()
         );
 
-        when(repo.findAll()).thenReturn(mockSuppliers);
+        Page<Supplier> mockPage = new PageImpl<>(mockSuppliers);
+        Pageable pageable = PageRequest.of(0, 10);
 
-        List<Supplier> result = supplierService.getAllSuppliers();
+        when(repo.findAll(pageable)).thenReturn(mockPage);
 
-        assertEquals(2, result.size());
-        assertEquals("Supplier A", result.get(0).getName());
-        assertEquals("Supplier B", result.get(1).getName());
+        Page<Supplier> result = supplierService.getAllSuppliers(pageable);
+
+        assertEquals(2, result.getNumberOfElements());
+        assertEquals("Supplier A", result.getContent().get(0).getName());
+        assertEquals("Supplier B", result.getContent().get(1).getName());
     }
 
     @Test

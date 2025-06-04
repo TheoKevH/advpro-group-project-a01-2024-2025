@@ -26,7 +26,7 @@ public class ProductController {
     @GetMapping("/create")
     public String createProductPage(Model model) {
         model.addAttribute("product", new ProductDTO());
-        return "product/createProduct";
+        return "product/CreateProduct";
     }
 
     @PostMapping("/create")
@@ -35,7 +35,7 @@ public class ProductController {
                                     Model model) {
 
         if (bindingResult.hasErrors()) {
-            return "product/createProduct";
+            return "product/CreateProduct";
         }
 
         try {
@@ -43,7 +43,7 @@ public class ProductController {
             return "redirect:/product";
         } catch (IllegalArgumentException ex) {
             bindingResult.rejectValue("productName", "error.productName", "Nama harus berbeda");
-            return "product/createProduct";
+            return "product/CreateProduct";
         }
     }
 
@@ -54,14 +54,14 @@ public class ProductController {
                 .map(ProductFactory::toDTO)
                 .toList();
         model.addAttribute("products", productDTOs);
-        return "product/productList";
+        return "product/ProductList";
     }
 
     @GetMapping("/edit/{id}")
     public String editProductPage(@PathVariable String id, Model model) {
         Product product = service.findById(id);
         model.addAttribute("product", ProductFactory.toDTO(product));
-        return "product/editProduct";
+        return "product/EditProduct";
     }
 
     @PostMapping("/edit")
@@ -70,7 +70,7 @@ public class ProductController {
                                   Model model) {
 
         if (bindingResult.hasErrors()) {
-            return "product/editProduct";
+            return "product/EditProduct";
         }
 
         service.edit(productDTO);
